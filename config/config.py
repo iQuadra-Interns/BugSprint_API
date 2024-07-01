@@ -1,0 +1,20 @@
+import os
+
+
+class Config:
+    ENVIRONMENT_NAME = os.getenv('ENVIRONMENT_NAME')
+    PRODUCT_NAME = os.getenv('PRODUCT_NAME')
+
+    PRODUCT_DETAILS = {
+        "DEV": {
+            'DB_HOST': 'dev-aurora-db-instance.cluster-cvba1b1hojx3.us-west-2.rds.amazonaws.com',
+            'DB_PORT': '3306',
+            'DB_USER_NAME': 'Admin',
+            'DB_PASSWORD': 'Admin12345',
+        }
+    }
+
+    CONN_STRING = f"mysql+pymysql://{PRODUCT_DETAILS[ENVIRONMENT_NAME]['DB_USER_NAME']}:{PRODUCT_DETAILS[ENVIRONMENT_NAME]['DB_PASSWORD']}@{PRODUCT_DETAILS[ENVIRONMENT_NAME]['DB_HOST']}:{PRODUCT_DETAILS[ENVIRONMENT_NAME]['DB_PORT']}/{PRODUCT_DETAILS[ENVIRONMENT_NAME]['DB_NM_COMMON']}"
+
+    AWS_ACCESS_KEY = PRODUCT_DETAILS[ENVIRONMENT_NAME]['AWS_ACCESS_KEY']
+    AWS_SECRET_KEY = PRODUCT_DETAILS[ENVIRONMENT_NAME]['AWS_SECRET_KEY']

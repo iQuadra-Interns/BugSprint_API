@@ -1,0 +1,17 @@
+boto3
+botocore
+
+numpy
+openpyxl
+pandas
+
+PyJWT
+requests
+
+pydantic
+uvicorn
+fastapi
+mangum
+sqlalchemy
+
+patool
