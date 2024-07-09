@@ -5,7 +5,6 @@ from sqlalchemy import select, and_
 import logging
 from config.database import ConnectionDetails, Tables
 from applications.signin.rq_rs.rq_signin import SignInRq
-from applications.signin.rq_rs.rs_signin import personal_details
 from applications.signin.rq_rs.rs_signin import personal_details,SignInRs
 
 logging.basicConfig(level=logging.DEBUG)
