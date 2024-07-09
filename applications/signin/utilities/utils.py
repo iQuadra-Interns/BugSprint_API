@@ -5,7 +5,7 @@ from sqlalchemy import select, and_
 import logging
 from config.database import ConnectionDetails, Tables
 from applications.signin.rq_rs.rq_signin import SignInRq
-from applications.signin.rq_rs.rs_signin import personal_details
+from applications.signin.rq_rs.rs_signin import PersonalDetails
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -68,7 +68,7 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
                 'phone_no': details.iloc[0]['phone_no'],
                 'role_of_the_user': details.iloc[0]['role_of_the_user']
             }
-            return personal_details.parse_obj(final_result)
+            return PersonalDetails.parse_obj(final_result)
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User details not found")
     else:
