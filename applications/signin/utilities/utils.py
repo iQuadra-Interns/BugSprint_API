@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
     metadata = MetaData(schema=ConnectionDetails.db_default_schema_name)
-    login_table = Table(Tables.user_login, metadata, autoload_with=engine)
+    login_table = Table(Tables.USER_LOGIN_TABLE, metadata, autoload_with=engine)
 
     query_to_check_user_data = select(
         login_table.c.id,
@@ -33,7 +33,7 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
 
     if not user_login_info_df.empty:
         user_info = {
-            'id' :user_login_info_df.iloc[0]['id'],
+            'id': user_login_info_df.iloc[0]['id'],
             'role': user_login_info_df.iloc[0]['role'],
             'category_id': user_login_info_df.iloc[0]['category_id'],
             'email': user_login_info_df.iloc[0]['email'],
@@ -41,23 +41,23 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
         }
 
         if user_info['role'] == 'developer':
-            table = Table(Tables.developer_personal_details, metadata, autoload_with=engine)
+            table_to_access = Table(Tables.DEVELOPER_PERSONAL_DETAILS, metadata, autoload_with=engine)
             details_field = 'developer_details'
         elif user_info['role'] == 'tester':
-            table = Table(Tables.tester_personal_detail, metadata, autoload_with=engine)
+            table_to_access = Table(Tables.TESTER_PERSONAL_DETAILS, metadata, autoload_with=engine)
             details_field = 'tester_details'
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid role')
 
         # Ensure the query includes the 'id' column
         query = select(
-            table.c.id,
-            table.c.first_name,
-            table.c.last_name,
-            table.c.phone_no,
-            table.c.role_of_the_user
+            table_to_access.c.id,
+            table_to_access.c.first_name,
+            table_to_access.c.last_name,
+            table_to_access.c.phone_no,
+            table_to_access.c.role_of_the_user
         ).where(
-            and_(table.c.id == user_info['category_id'])
+            and_(table_to_access.c.id == user_info['category_id'])
         )
 
         with engine.begin() as connection:

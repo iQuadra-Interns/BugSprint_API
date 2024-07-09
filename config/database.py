@@ -13,6 +13,6 @@ class ConnectionDetails:
     metadata=MetaData()
 
 class Tables:
-    user_login = "user_details"
-    developer_personal_details="developer_details"
-    tester_personal_detail="tester_details"
+    USER_LOGIN_TABLE = "user_details"
+    DEVELOPER_PERSONAL_DETAILS = "developer_details"
+    TESTER_PERSONAL_DETAILS = "tester_details"
