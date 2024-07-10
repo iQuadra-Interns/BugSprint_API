@@ -23,7 +23,7 @@ logger = logging.getLogger('bug-sprint-logger')
 
 def add_applications():
     return [
-        Mount("applications/admin", admin),
+        Mount("/admin", admin),
         Mount("/signin", signin),
     ]
 
