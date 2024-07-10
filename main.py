@@ -1,4 +1,6 @@
 import sys
+import os
+os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 
 sys.path.append("/mnt/python/lib")
 
@@ -6,11 +8,11 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.routing import Mount
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum
+from mangum import Mangum # type: ignore
 import logging
 
-from applications.admin.admin import admin
 from applications.signin.signin import signin
+from applications.bugs.bugs import bugs
 
 
 logging.basicConfig(
@@ -25,6 +27,8 @@ def add_applications():
     return [
         Mount("/admin", admin),
         Mount("/signin", signin),
+        Mount("/bugs_list",bugs) # type: ignore
+        
     ]
 
 
