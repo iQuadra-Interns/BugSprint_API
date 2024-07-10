@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from applications.bugs.utils.utils_bugs import fetch_bugs_list
-from applications.practice.rq_rs.rs_bugs import BugsListResponse , BugsList
+from applications.bugs.rq_rs.rs_bugs import BugsListResponse , BugsList
 
 router = APIRouter()
 
