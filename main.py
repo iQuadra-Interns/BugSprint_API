@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 import logging
 
-from applications.admin.admin import admin
+#from applications.admin.admin import admin
 from applications.signin.signin import signin
 
 
@@ -23,7 +23,7 @@ logger = logging.getLogger('bug-sprint-logger')
 
 def add_applications():
     return [
-        Mount("/admin", admin),
+        #Mount("/admin", admin),
         Mount("/signin", signin),
     ]
 
@@ -46,7 +46,7 @@ def configure_application() -> FastAPI:
 application = configure_application()
 application_handler = Mangum(application)
 
-admin_handler = Mangum(admin)
+#admin_handler = Mangum(admin)
 signin_handler = Mangum(signin)
 
 
