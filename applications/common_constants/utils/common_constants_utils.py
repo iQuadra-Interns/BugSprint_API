@@ -1,22 +1,31 @@
 from sqlalchemy.engine import Connection
-from sqlalchemy import text, inspect
+from sqlalchemy import inspect, text
 from fastapi import HTTPException
 
-def get_table_data(connection: Connection, table_name: str):
+def get_all_table_data(connection: Connection):
     try:
-        # Get the columns of the table
         inspector = inspect(connection)
-        columns = [col['name'] for col in inspector.get_columns(table_name)]
+        table_names = inspector.get_table_names()
+        
+        if not table_names:
+            raise HTTPException(status_code=404, detail="No tables found in the database")
 
-        # Execute the query
-        query = text(f"SELECT * FROM {table_name}")
-        result = connection.execute(query).fetchall()
+        data = {}
+        for table_name in table_names:
+            try:
+                # Get the columns of the table
+                columns = [col['name'] for col in inspector.get_columns(table_name)]
+                
+                # Execute the query to fetch all data
+                table_query = text(f"SELECT * FROM {table_name}")
+                result = connection.execute(table_query).fetchall()
+                
+                # Convert result to list of dictionaries
+                table_data = [dict(zip(columns, row)) for row in result]
+                data[table_name] = table_data
+            except Exception as e:
+                data[table_name] = f"Error fetching data: {e}"
 
-        if not result:
-            raise HTTPException(status_code=404, detail=f"No data found for table {table_name}")
-
-        # Convert result to list of dictionaries
-        data = [dict(zip(columns, row)) for row in result]
         return {"data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching data: {e}")
