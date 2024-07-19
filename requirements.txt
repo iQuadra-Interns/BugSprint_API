@@ -4,6 +4,7 @@ botocore
 numpy
 openpyxl
 pandas
+PyMysql
 
 PyJWT
 requests
