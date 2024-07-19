@@ -11,6 +11,7 @@ import logging
 
 #from applications.admin.admin import admin
 from applications.signin.signin import signin
+from applications.bugs.bugs import bugs
 
 
 logging.basicConfig(
@@ -25,6 +26,9 @@ def add_applications():
     return [
         #Mount("/admin", admin),
         Mount("/signin", signin),
+        Mount("/bugs",bugs)
+
+
     ]
 
 
@@ -48,6 +52,7 @@ application_handler = Mangum(application)
 
 #admin_handler = Mangum(admin)
 signin_handler = Mangum(signin)
+bugs_handler = Mangum(bugs)
 
 
 @application.get("/")
