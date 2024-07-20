@@ -86,6 +86,10 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
 
             return sign_in_response
         else:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User details not found")
+            resp = SignInRs(status=Status(sts=True,err=f"{status.HTTP_401_UNAUTHORIZED}",msg="Operation failed because user personal details are misssing"))
+            return resp
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid login credentials")
+        resp = SignInRs(
+            status=Status(sts=False, err=f"{status.HTTP_401_UNAUTHORIZED}", msg="Operation failed due to invalid credentials"))
+        return resp
+        
