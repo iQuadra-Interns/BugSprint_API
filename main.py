@@ -1,22 +1,19 @@
 import sys
 import os
-os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
-
-sys.path.append("/mnt/python/lib")
-
 import uvicorn
 from fastapi import FastAPI
 from fastapi.routing import Mount
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum 
+from mangum import Mangum
 import logging
 
+# Ensure the applications are correctly imported
 from applications.signin.signin import signin
+from applications.bugs_list.bugs_list import bugs_list
 
+app = FastAPI()
 
-#from applications.admin.admin import admin
-
-
+# Configure logging
 logging.basicConfig(
     filename="mainapp.log",
     format='%(asctime)s %(levelname)s %(module)s::%(filename)s:%(lineno)d::%(funcName)s %(message)s',
@@ -24,17 +21,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger('bug-sprint-logger')
 
-
 def add_applications():
     return [
-        Mount("/admin", admin),
-        Mount("/signin", signin),
-        Mount("/bugs_list",bugs),
-        Mount("/bugs",bugs)
-]
-
-
-    
+        # Mount applications here
+        
+        Mount("/bugs_list", bugs_list)
+    ]
 
 def configure_application() -> FastAPI:
     app = FastAPI(
@@ -50,13 +42,12 @@ def configure_application() -> FastAPI:
     )
     return app
 
-
 application = configure_application()
 application_handler = Mangum(application)
 
-#admin_handler = Mangum(admin)
-signin_handler = Mangum(signin)
+# Ensure individual handlers if needed
 
+bugs_list_handler = Mangum(bugs_list)
 
 @application.get("/")
 def main_app():
@@ -67,8 +58,5 @@ def main_app():
     }
     return resp
 
-print("main.py executed successfully.")
-
 if __name__ == '__main__':
     uvicorn.run(application, host="127.0.0.1", port=8000)
-
