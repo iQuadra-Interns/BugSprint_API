@@ -8,11 +8,13 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.routing import Mount
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum # type: ignore
+from mangum import Mangum 
 import logging
 
 from applications.signin.signin import signin
-from applications.bugs.bugs import bugs
+
+
+#from applications.admin.admin import admin
 
 
 logging.basicConfig(
@@ -27,10 +29,12 @@ def add_applications():
     return [
         Mount("/admin", admin),
         Mount("/signin", signin),
-        Mount("/bugs_list",bugs) # type: ignore
-        
-    ]
+        Mount("/bugs_list",bugs),
+        Mount("/bugs",bugs)
+]
 
+
+    
 
 def configure_application() -> FastAPI:
     app = FastAPI(
@@ -50,7 +54,7 @@ def configure_application() -> FastAPI:
 application = configure_application()
 application_handler = Mangum(application)
 
-admin_handler = Mangum(admin)
+#admin_handler = Mangum(admin)
 signin_handler = Mangum(signin)
 
 

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.engine import Connection
-from applications.all.rq_rs.rq_all import DatabaseNameRequest
-from applications.all.utils.all_utils import get_all_table_data
-from applications.all.utils.db import get_db_connection
-from applications.all.rq_rs.rs_all import AllTablesDataResponse
+from applications.common_constants.rq_rs.rq_all import DatabaseNameRequest
+from applications.common_constants.utils.all_utils import get_all_table_data
+from applications.common_constants.utils.db import get_db_connection
+from applications.common_constants.rq_rs.rs_all import AllTablesDataResponse
 
 
 router = APIRouter()

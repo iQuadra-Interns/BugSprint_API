@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from applications.bugs.utils.db import bugs_List, engine
+from applications.bugs_list.utils.db import bugs_List, engine
 
 def fetch_bugs_list():
     query = select(
