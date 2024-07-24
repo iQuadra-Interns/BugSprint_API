@@ -4,6 +4,7 @@ botocore
 numpy
 openpyxl
 pandas
+PyMysql
 
 PyJWT
 requests
@@ -13,5 +14,6 @@ uvicorn
 fastapi
 mangum
 sqlalchemy
+PyMySQL
 
 patool

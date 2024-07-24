@@ -16,7 +16,7 @@ def str_2_dict(string: str) -> dict:
 
 def generate_random_password(length: int = 8) -> str:
     """
-    This fucntion generates a password with given length. And it makes sure that the following conditions are satisfied:
+    This function generates a password with given length. And it makes sure that the following conditions are satisfied:
         1. At least one Uppercase Letter.
         2. At least one Lowercase Letter.
         3. At least one Digit.
