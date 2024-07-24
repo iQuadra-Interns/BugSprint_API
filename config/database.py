@@ -16,4 +16,3 @@ class Tables:
     USER_LOGIN_TABLE = "user_details"
     DEVELOPER_PERSONAL_DETAILS = "developer_details"
     TESTER_PERSONAL_DETAILS = "tester_details"
-    ADMIN_PERSONAL_DETAILS = "admin_details"
