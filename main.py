@@ -25,7 +25,7 @@ def add_applications():
         # Mount applications here
         
         Mount("/bugs_list", bugs_list_router),
-        Mount("/common_constants", common_constants_router)
+        Mount("/all_common_constants", common_constants_router)
     ]
 
 def configure_application() -> FastAPI:
