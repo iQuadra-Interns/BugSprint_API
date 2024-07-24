@@ -29,7 +29,7 @@ def add_applications():
         # Mount applications here
         
         Mount("/bugs_list", bugs_list_router),
-        Mount("/all_common_constants", common_constants_router)
+        Mount("/all_common_constants", common_constants_router),
         #Mount("/admin", admin),
         Mount("/signin", signin),
         Mount("/bugs",bugs)
