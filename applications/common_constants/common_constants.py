@@ -8,11 +8,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
-from applications.bugs_list.routes.bugs_list_routes import router as bugs_list_router
-
+from applications.common_constants.routes.all_route import router as common_constants_router
 
 def add_routes(app: FastAPI):
-    app.include_router(bugs_list_router)
+    app.include_router(common_constants_router)
 
 
 def configure_application() -> FastAPI:
@@ -28,15 +27,15 @@ def configure_application() -> FastAPI:
     return app
 
 
-bugs_list_router = configure_application()
+common_constants_router = configure_application()
 
 
-@bugs_list_router.get("/")
+@common_constants_router.get("/")
 def _():
     resp = {
         'sts': True,
         'err': '',
-        'msg': "You've reached the bugs_list application. You need to access sub routes/resources/paths"
-               " as /api/bugs_list/*."
+        'msg': "You've reached the common_constants application. You need to access sub routes/resources/paths"
+               
     }
     return resp

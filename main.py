@@ -9,9 +9,8 @@ import logging
 
 # Ensure the applications are correctly imported
 
-from applications.bugs_list.bugs_list import bugs_list
-
-app = FastAPI()
+from applications.bugs_list.bugs_list import bugs_list_router
+from applications.common_constants.common_constants import common_constants_router
 
 # Configure logging
 logging.basicConfig(
@@ -25,7 +24,8 @@ def add_applications():
     return [
         # Mount applications here
         
-        Mount("/bugs_list", bugs_list)
+        Mount("/bugs_list", bugs_list_router),
+        Mount("/common_constants", common_constants_router)
     ]
 
 def configure_application() -> FastAPI:
@@ -47,7 +47,8 @@ application_handler = Mangum(application)
 
 # Ensure individual handlers if needed
 
-bugs_list_handler = Mangum(bugs_list)
+bugs_list_handler = Mangum(bugs_list_router)
+common_constants_handler = Mangum(common_constants_router)
 
 @application.get("/")
 def main_app():
