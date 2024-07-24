@@ -25,5 +25,5 @@ def fetch_bugs_list():
             ]
         return constants
     except SQLAlchemyError as e:
-        print(f"Error fetching bugslist: {e}")
+        print(f"Error fetching bugs list: {e}")
         return []

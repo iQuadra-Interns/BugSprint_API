@@ -1,17 +1,13 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, String
 
-import pandas as pd # type: ignore
-
 hostname = "localhost"
 username = "root"
 password = ""
 database = "bug_sprint"
 port = 3306
 
-
-engine = create_engine('mysql+pymysql://' + username + ':' + password + '@' + hostname + ':' + str(port) + '/' + database)
+engine = create_engine(f'mysql+pymysql://{username}:{password}@{hostname}:{port}/{database}')
 metadata = MetaData()
-
 
 bugs_List = Table(
     'bugs_list', metadata,
@@ -23,4 +19,3 @@ bugs_List = Table(
 )
 
 metadata.create_all(engine)
-

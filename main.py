@@ -8,7 +8,7 @@ from mangum import Mangum
 import logging
 
 # Ensure the applications are correctly imported
-from applications.signin.signin import signin
+
 from applications.bugs_list.bugs_list import bugs_list
 
 app = FastAPI()

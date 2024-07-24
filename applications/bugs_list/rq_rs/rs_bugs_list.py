@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import List
-from common.classes.generic import Status
 
 class BugsList(BaseModel):
     bug_id: str
@@ -10,5 +9,4 @@ class BugsList(BaseModel):
     assignee: str
 
 class BugsListResponse(BaseModel):
-    status: Status
     data: List[BugsList]
