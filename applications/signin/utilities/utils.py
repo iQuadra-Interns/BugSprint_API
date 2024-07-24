@@ -46,6 +46,9 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
         elif user_info['role'] == 'tester':
             table_to_access = Table(Tables.TESTER_PERSONAL_DETAILS, metadata, autoload_with=engine)
             details_field = 'tester_details'
+        elif user_info['role'] == 'admin':
+            table_to_access = Table(Tables.ADMIN_PERSONAL_DETAILS,metadata,autoload_with=engine)
+            details_field = 'admin_details'
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid role')
 

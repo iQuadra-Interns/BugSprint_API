@@ -17,3 +17,4 @@ class Tables:
     DEVELOPER_PERSONAL_DETAILS = "developer_details"
     TESTER_PERSONAL_DETAILS = "tester_details"
     BUGS_TABLE = "bugs"
+    ADMIN_PERSONAL_DETAILS ="admin_details"
