@@ -13,7 +13,7 @@ os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 
 # Ensure the applications are correctly imported
 
-from applications.admin.admin import admin
+#from applications.admin.admin import admin
 
 
 #from applications.signin.signin import signin
@@ -36,7 +36,7 @@ def add_applications():
         
         Mount("/bugs_list", bugs_list_router),
         Mount("/all_common_constants", common_constants_router),
-        Mount("/admin", admin),
+        #Mount("/admin", admin),
         #Mount("/signin", signin),
         #Mount("/bugs",bugs)
 
@@ -62,8 +62,8 @@ application = configure_application()
 application_handler = Mangum(application)
 
 #admin_handler = Mangum(admin)
-signin_handler = Mangum(signin)
-bugs_handler = Mangum(bugs)
+#signin_handler = Mangum(signin)
+#bugs_handler = Mangum(bugs)
 
 bugs_list_handler = Mangum(bugs_list_router)
 common_constants_handler = Mangum(common_constants_router)
