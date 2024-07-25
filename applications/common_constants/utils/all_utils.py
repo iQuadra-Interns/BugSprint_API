@@ -1,20 +1,15 @@
-
 import sys
 import os
 
 sys.path.append('/home/sanju/Documents/Intern_work/BugSprint_API')
 
-# applications/common_constants/utils/all_utils.py
-
 from sqlalchemy import inspect, text
-from sqlalchemy.engine import Connection
+from sqlalchemy.engine import Connection, Engine
 from fastapi import HTTPException
 from typing import Generator, Dict, List, Any, Union
-from config.database import create_engine_for_db
 from applications.common_constants.rq_rs.rs_all import Status
 
-def get_db_connection(database: str) -> Generator[Connection, None, None]:
-    engine = create_engine_for_db(database)
+def get_db_connection(engine: Engine) -> Generator[Connection, None, None]:
     connection = engine.connect()
     try:
         yield connection
