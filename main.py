@@ -13,11 +13,11 @@ os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 
 # Ensure the applications are correctly imported
 
-#from applications.admin.admin import admin
+from applications.admin.admin import admin
 
 
-#from applications.signin.signin import signin
-#from applications.bugs.bugs import bugs
+from applications.signin.signin import signin
+from applications.bugs.bugs import bugs
 
 from applications.bugs_list.bugs_list import bugs_list_router
 from applications.common_constants.common_constants import common_constants_router
@@ -36,9 +36,9 @@ def add_applications():
         
         Mount("/bugs_list", bugs_list_router),
         Mount("/all_common_constants", common_constants_router),
-        #Mount("/admin", admin),
-        #Mount("/signin", signin),
-        #Mount("/bugs",bugs)
+        Mount("/admin", admin),
+        Mount("/signin", signin),
+        Mount("/bugs",bugs)
 
 
     ]
@@ -61,9 +61,9 @@ def configure_application() -> FastAPI:
 application = configure_application()
 application_handler = Mangum(application)
 
-#admin_handler = Mangum(admin)
-#signin_handler = Mangum(signin)
-#bugs_handler = Mangum(bugs)
+admin_handler = Mangum(admin)
+signin_handler = Mangum(signin)
+bugs_handler = Mangum(bugs)
 
 bugs_list_handler = Mangum(bugs_list_router)
 common_constants_handler = Mangum(common_constants_router)

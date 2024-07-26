@@ -1,6 +1,6 @@
 import os
 import subprocess
-import patoolib # type: ignore
+import patoolib 
 
 from environment_details import EnvironmentDetails
 
