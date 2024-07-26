@@ -8,11 +8,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
-from applications.signin.routes.signin_router import signin_router
+from applications.bugs_list.routes.bugs_list_routes import router as bugs_list_router
 
 
 def add_routes(app: FastAPI):
-    app.include_router(signin_router)
+    app.include_router(bugs_list_router)
 
 
 def configure_application() -> FastAPI:
@@ -28,15 +28,15 @@ def configure_application() -> FastAPI:
     return app
 
 
-signin = configure_application()
+bugs_list_router = configure_application()
 
 
-@signin.get("/")
+@bugs_list_router.get("/")
 def _():
     resp = {
         'sts': True,
         'err': '',
-        'msg': "You've reached the signin application. You need to access sub routes/resources/paths"
-               " as /api/signin/*."
+        'msg': "You've reached the bugs_list application. You need to access sub routes/resources/paths"
+               " as /api/bugs_list/*."
     }
     return resp

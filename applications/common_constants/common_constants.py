@@ -8,11 +8,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
-from applications.signin.routes.signin_router import signin_router
-
+from applications.common_constants.routes.all_route import router as common_constants_router
 
 def add_routes(app: FastAPI):
-    app.include_router(signin_router)
+    app.include_router(common_constants_router)
 
 
 def configure_application() -> FastAPI:
@@ -28,15 +27,15 @@ def configure_application() -> FastAPI:
     return app
 
 
-signin = configure_application()
+common_constants_router = configure_application()
 
 
-@signin.get("/")
+@common_constants_router.get("/")
 def _():
     resp = {
         'sts': True,
         'err': '',
-        'msg': "You've reached the signin application. You need to access sub routes/resources/paths"
-               " as /api/signin/*."
+        'msg': "You've reached the common_constants application. You need to access sub routes/resources/paths"
+               
     }
     return resp
