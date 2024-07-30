@@ -50,9 +50,12 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
             table_to_access = Table(Tables.ADMIN_PERSONAL_DETAILS,metadata,autoload_with=engine)
             details_field = 'admin_details'
         else:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid role')
+            resp = SignInRs(
+                status=Status(sts=False, err=f"{status.HTTP_401_UNAUTHORIZED}",
+                              msg="Operation failed due to invalid role"))
+            return resp
 
-        # Ensure the query includes the 'id' column
+
         query = select(
             table_to_access.c.id,
             table_to_access.c.first_name,
@@ -89,7 +92,7 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
 
             return sign_in_response
         else:
-            resp = SignInRs(status=Status(sts=True,err=f"{status.HTTP_401_UNAUTHORIZED}",msg="Operation failed because user personal details are misssing"))
+            resp = SignInRs(status=Status(sts=True,err=f"{status.HTTP_404_NOT_FOUND}",msg="Operation failed because user personal details are misssing"))
             return resp
     else:
         resp = SignInRs(

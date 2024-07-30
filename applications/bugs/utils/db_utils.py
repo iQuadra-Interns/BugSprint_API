@@ -1,14 +1,17 @@
 import logging
+from fastapi import HTTPException,status
 from sqlalchemy import MetaData, Table, insert ,update
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from applications.bugs.rq_rs.rq_bugs import AddBugRq , UpdateBugRq
+from common.classes.generic import Status
+from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse
 from config.database import Tables, ConnectionDetails
 
 logger = logging.getLogger(__name__)
 
 
-def add_bug(engine: Engine, bug_info: AddBugRq) -> int:
+def add_bug(engine: Engine, bug_info: AddBugRq):
     logger.info("Creating a new bug entry")
     metadata = MetaData(schema=ConnectionDetails.db_default_schema_name)
     bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
@@ -36,10 +39,16 @@ def add_bug(engine: Engine, bug_info: AddBugRq) -> int:
             res = connection.execute(insert_into_bugs_query)
             bug_id = res.inserted_primary_key[0]
             logger.info("Bug entry created successfully")
-            return bug_id
+            if bug_id is None:
+                status = Status(sts=False,err="500",msg="Operation Failed")
+                return AddBugResponse(status=status, bug_id=0)
+
+            status = Status(sts=True, err="null", msg="Bug created successfully")
+            return AddBugResponse(status=status, bug_id=bug_id )
     except SQLAlchemyError as e:
         logger.error(f"Error creating bug entry: {e}")
-        return None
+        status = Status(sts=False, err="500", msg="Operation Failed")
+        return AddBugResponse(status=status, bug_id=0)
 
 
 def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq) :
@@ -70,9 +79,13 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq) :
             result = connection.execute(update_bug_query)
             if result.rowcount == 0:
                 logger.warning("No bug entry found with the given ID")
-                return False
+                status = Status(sts=False, err="404", msg="enter proper bug_id")
+                raise HTTPException(status_code=404, detail=status.dict())
+
             logger.info("Bug entry updated successfully")
-            return True
+            status = Status(sts=True, err=None, msg=f"Bug updated successfully with id : {bug_id}")
+            return UpdateBugResponse(status=status)
     except SQLAlchemyError as e:
         logger.error(f"Error updating bug entry: {e}")
-        return False
+        status = Status(sts=False, err=str(e), msg="enter proper bug_info")
+        raise HTTPException(status_code=500, detail=status.dict())
