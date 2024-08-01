@@ -6,7 +6,7 @@ class ConnectionDetails:
     password = ''
     host = 'localhost'
     port = '3306'
-    db_default_schema_name = 'bug_sprint'
+    db_default_schema_name = 'bugsprint'
 
     connection_string = f'{database_type}://{user_name}:{password}@{host}:{port}/{db_default_schema_name}'
     engine = create_engine(connection_string)
