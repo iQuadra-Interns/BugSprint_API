@@ -1,17 +1,16 @@
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine,MetaData
 
 class ConnectionDetails:
-    database_type = 'mysql+pymysql'
-    user_name = 'root'
-    password = ''
+    database_type ='mysql+pymysql'
+    user_name = 'satish'
+    password = 'satish123'
     host = 'localhost'
     port = '3306'
     db_default_schema_name = 'bugsprint'
 
     connection_string = f'{database_type}://{user_name}:{password}@{host}:{port}/{db_default_schema_name}'
     engine = create_engine(connection_string)
-    metadata = MetaData()
-    metadata.reflect(bind=engine)
+    metadata=MetaData()
 
 class Tables:
     USER_LOGIN_TABLE = "user_details"
