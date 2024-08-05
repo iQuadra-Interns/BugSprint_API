@@ -19,7 +19,7 @@ from applications.admin.admin import admin
 from applications.signin.signin import signin
 from applications.bugs.bugs import bugs
 
-#from applications.bugs_list.bugs_list import bugs_list_router
+from applications.bugs_list.bugs_list import bugs_list_router
 from applications.common_constants.common_constants import common_constants_router
 
 # Configure logging
@@ -34,7 +34,7 @@ def add_applications():
     return [
         # Mount applications here
         
-        #Mount("/bugs_list", bugs_list_router),
+        Mount("/bugs_list", bugs_list_router),
         Mount("/all_common_constants", common_constants_router),
         Mount("/admin", admin),
         Mount("/signin", signin),
@@ -65,7 +65,7 @@ admin_handler = Mangum(admin)
 signin_handler = Mangum(signin)
 bugs_handler = Mangum(bugs)
 
-#bugs_list_handler = Mangum(bugs_list_router)
+bugs_list_handler = Mangum(bugs_list_router)
 common_constants_handler = Mangum(common_constants_router)
 
 @application.get("/")
