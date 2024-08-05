@@ -1,5 +1,8 @@
 from sqlalchemy import create_engine, MetaData
 class ConnectionDetails:
+    database_type ='mysql+pymysql'
+    user_name = 'root'
+    password = 'ramya1256'
     database_type = 'mysql+pymysql'
     user_name = 'root'
     password = 'Sanju%402004'

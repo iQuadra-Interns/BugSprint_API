@@ -1,10 +1,11 @@
 import logging
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from config.database import ConnectionDetails
 from applications.bugs.rq_rs.rq_bugs import AddBugRq,UpdateBugRq
-from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse
-from applications.bugs.utils.db_utils import add_bug,update_bug
+from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse
+from applications.bugs.utils.db_utils import add_bug,update_bug, find_bug
 from common.classes.generic import Status
 
 logger = logging.getLogger(__name__)
@@ -27,4 +28,13 @@ def update_bug_endpoint(bug_id: int, bug_info: UpdateBugRq) -> UpdateBugResponse
     logger.info("Received request to update bug with ID %s", bug_id)
     engine = create_engine(ConnectionDetails.connection_string)
     resp = update_bug(engine,bug_id,bug_info)
+    return resp
+
+@bug_router.get("/api/find-bug/{bug_id}",
+                response_model=FindBugResponse,
+                response_model_exclude_unset=True)
+def find_bug_endpoint(bug_id: int) -> FindBugResponse:
+    logger.info("Received request to find bug with ID %s", bug_id)
+    engine = create_engine(ConnectionDetails.connection_string)
+    resp = find_bug(engine, bug_id)
     return resp
