@@ -3,7 +3,7 @@ Authors: Generic/Common classes for various requests and responses
 JIRA Tkt: NA
 """
 import datetime
-from typing import Union, List
+from typing import Union, List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -19,3 +19,9 @@ class UserId(BaseModel):
     user_id: Union[int, None] = None
     user_category: Union[str, None] = None
     user_cat_id: Union[int, None] = None
+
+
+class Status(BaseModel):
+    sts: bool
+    err: Optional[str] = None
+    msg: Optional[str] = None

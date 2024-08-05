@@ -2,8 +2,8 @@ from sqlalchemy import create_engine,MetaData
 
 class ConnectionDetails:
     database_type ='mysql+pymysql'
-    user_name = 'satish'
-    password = 'satish123'
+    user_name = 'root'
+    password = 'ramya1256'
     host = 'localhost'
     port = '3306'
     db_default_schema_name = 'bugsprint'

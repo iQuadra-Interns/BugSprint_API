@@ -1,11 +1,11 @@
 import logging
 from fastapi import HTTPException,status
-from sqlalchemy import MetaData, Table, insert ,update
+from sqlalchemy import MetaData, Table, insert ,update ,select
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from applications.bugs.rq_rs.rq_bugs import AddBugRq , UpdateBugRq
 from common.classes.generic import Status
-from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse
+from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse
 from config.database import Tables, ConnectionDetails
 
 logger = logging.getLogger(__name__)
@@ -89,3 +89,64 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq) :
         logger.error(f"Error updating bug entry: {e}")
         status = Status(sts=False, err=str(e), msg="enter proper bug_info")
         raise HTTPException(status_code=500, detail=status.dict())
+    
+
+def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
+    logger.info("Finding a bug entry with ID: %s", bug_id)
+    bugs_table = Table(Tables.BUGS_TABLE, ConnectionDetails.metadata, autoload_with=engine)
+
+    select_bug_query = select([
+        bugs_table.c.id.label('bug_id'),
+        bugs_table.c.reported_date,
+        bugs_table.c.reporter,
+        bugs_table.c.assignee,
+        bugs_table.c.product_name,
+        bugs_table.c.environment,
+        bugs_table.c.testing_medium,
+        bugs_table.c.scenario,
+        bugs_table.c.description,
+        bugs_table.c.user_data,
+        bugs_table.c.priority,
+        bugs_table.c.status,
+        bugs_table.c.root_cause_location,
+        bugs_table.c.root_cause,
+        bugs_table.c.solution,
+        bugs_table.c.comments
+    ]).where(bugs_table.c.id == bug_id)
+
+    try:
+        with engine.begin() as connection:
+            result = connection.execute(select_bug_query)
+            bug = result.fetchone()
+
+            if not bug:
+                logger.warning("No bug entry found with the given ID: %s", bug_id)
+                status = Status(sts=False, err="404", msg="Bug not found")
+                raise HTTPException(status_code=404, detail=status.dict())
+
+            logger.info("Bug entry found successfully with ID: %s", bug_id)
+            status = Status(sts=True, err=None, msg="Bug found successfully")
+            return FindBugResponse(
+                status=status,
+                bug_id=bug.bug_id,
+                reported_date=bug.reported_date,
+                reporter=bug.reporter,
+                assignee=bug.assignee,
+                product_name=bug.product_name,
+                environment=bug.environment,
+                testing_medium=bug.testing_medium,
+                scenario=bug.scenario,
+                description=bug.description,
+                user_data=bug.user_data,
+                priority=bug.priority,
+                status=bug.status,
+                root_cause_location=bug.root_cause_location,
+                root_cause=bug.root_cause,
+                solution=bug.solution,
+                comments=bug.comments
+            )
+    except SQLAlchemyError as e:
+        logger.error(f"Error finding bug entry: {e}")
+        status = Status(sts=False, err=str(e), msg="Failed to find the bug")
+        raise HTTPException(status_code=500, detail=status.model_dump())
+    
