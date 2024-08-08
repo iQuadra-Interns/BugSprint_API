@@ -5,7 +5,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from applications.bugs.rq_rs.rq_bugs import AddBugRq , UpdateBugRq
 from common.classes.generic import Status
-from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse
+from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse, BugDetails
 from config.database import Tables, ConnectionDetails
 
 logger = logging.getLogger(__name__)
@@ -92,61 +92,43 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq) :
     
 
 def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
-    logger.info("Finding a bug entry with ID: %s", bug_id)
-    bugs_table = Table(Tables.BUGS_TABLE, ConnectionDetails.metadata, autoload_with=engine)
+    logger.info("Finding bug entry with ID %s", bug_id)
+    metadata = MetaData(schema=ConnectionDetails.db_default_schema_name)
+    bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
 
-    select_bug_query = select([
-        bugs_table.c.id.label('bug_id'),
-        bugs_table.c.reported_date,
-        bugs_table.c.reporter,
-        bugs_table.c.assignee,
-        bugs_table.c.product_name,
-        bugs_table.c.environment,
-        bugs_table.c.testing_medium,
-        bugs_table.c.scenario,
-        bugs_table.c.description,
-        bugs_table.c.user_data,
-        bugs_table.c.priority,
-        bugs_table.c.status,
-        bugs_table.c.root_cause_location,
-        bugs_table.c.root_cause,
-        bugs_table.c.solution,
-        bugs_table.c.comments
-    ]).where(bugs_table.c.id == bug_id)
+    select_bug_query = select(bugs_table).where(bugs_table.c.id == bug_id)
 
     try:
-        with engine.begin() as connection:
-            result = connection.execute(select_bug_query)
-            bug = result.fetchone()
-
-            if not bug:
-                logger.warning("No bug entry found with the given ID: %s", bug_id)
+        with engine.connect() as connection:
+            result = connection.execute(select_bug_query).fetchone()
+            if result is None:
+                logger.warning("No bug entry found with the given ID %s", bug_id)
                 status = Status(sts=False, err="404", msg="Bug not found")
-                raise HTTPException(status_code=404, detail=status.dict())
+                return FindBugResponse(status=status, bug=None)
 
-            logger.info("Bug entry found successfully with ID: %s", bug_id)
-            status = Status(sts=True, err=None, msg="Bug found successfully")
-            return FindBugResponse(
-                status=status,
-                bug_id=bug.bug_id,
-                reported_date=bug.reported_date,
-                reporter=bug.reporter,
-                assignee=bug.assignee,
-                product_name=bug.product_name,
-                environment=bug.environment,
-                testing_medium=bug.testing_medium,
-                scenario=bug.scenario,
-                description=bug.description,
-                user_data=bug.user_data,
-                priority=bug.priority,
-                status=bug.status,
-                root_cause_location=bug.root_cause_location,
-                root_cause=bug.root_cause,
-                solution=bug.solution,
-                comments=bug.comments
+            # Access by index if using tuple
+            bug_details = BugDetails(
+                reported_date=result[1],  # Index should match the order in your table schema
+                reporter=result[2],
+                assignee=result[3],
+                product_name=result[4],
+                environment=result[5],
+                testing_medium=result[6],
+                scenario=result[7],
+                description=result[8],
+                user_data=result[9],
+                priority=result[10],
+                status=result[11],
+                root_cause_location=result[12],
+                root_cause=result[13],
+                solution=result[14],
+                comments=result[15]
             )
+
+            status = Status(sts=True, err=None, msg="Bug found successfully")
+            return FindBugResponse(status=status, bug=bug_details)
     except SQLAlchemyError as e:
         logger.error(f"Error finding bug entry: {e}")
-        status = Status(sts=False, err=str(e), msg="Failed to find the bug")
-        raise HTTPException(status_code=500, detail=status.model_dump())
-    
+        status = Status(sts=False, err=str(e), msg="Operation Failed")
+        return FindBugResponse(status=status, bug=None)
+
