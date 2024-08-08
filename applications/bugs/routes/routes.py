@@ -1,10 +1,10 @@
 import logging
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
+#from sqlalchemy.exc import SQLAlchemyError
 from config.database import ConnectionDetails
 from applications.bugs.rq_rs.rq_bugs import AddBugRq,UpdateBugRq
-from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse
+from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse, BugDetails
 from applications.bugs.utils.db_utils import add_bug,update_bug, find_bug
 from common.classes.generic import Status
 

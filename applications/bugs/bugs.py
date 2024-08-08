@@ -7,7 +7,6 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-
 from applications.bugs.routes.routes import bug_router
 
 
@@ -27,9 +26,7 @@ def configure_application() -> FastAPI:
     add_routes(app)
     return app
 
-
 bugs = configure_application()
-
 
 @bugs.get("/")
 def _():

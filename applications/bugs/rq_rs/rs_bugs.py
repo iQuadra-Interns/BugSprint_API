@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from common.classes.generic import Status
-from typing import Optional
 from datetime import datetime
 
 class AddBugResponse(BaseModel):
@@ -10,15 +9,8 @@ class AddBugResponse(BaseModel):
 class UpdateBugResponse(BaseModel):
     status: Status
 
-class Status(BaseModel):
-    sts: bool
-    err: str
-    msg: str
-
-class FindBugResponse(BaseModel):
-    status: Status
-    bug_id: int
-    reported_date: datetime  # Now recognized as datetime is imported
+class BugDetails(BaseModel):
+    reported_date: datetime
     reporter: str
     assignee: str
     product_name: str
@@ -34,4 +26,6 @@ class FindBugResponse(BaseModel):
     solution: str
     comments: str
 
-   
+class FindBugResponse(BaseModel):
+    status: Status
+    bug: BugDetails
