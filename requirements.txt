@@ -18,3 +18,4 @@ PyMySQL
 
 patool
 cryptography
+python-dotenv
