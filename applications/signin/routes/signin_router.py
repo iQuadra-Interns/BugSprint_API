@@ -22,6 +22,6 @@ signin_router = APIRouter()
     response_model_exclude_unset=True
 )
 def sign_in_info(rq: Request, sign_in: SignInRq) -> SignInRs:
-    engine = create_engine(DatabaseDetails.CONN_STRING)
+    engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     user = fetch_complete_user_info(engine, sign_in)
     return user
