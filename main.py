@@ -1,4 +1,6 @@
 import sys
+sys.path.append("/mnt/efs/BugSprint_312/lib/python3.12/site-packages")
+
 import os
 import uvicorn
 from fastapi import FastAPI
@@ -64,8 +66,7 @@ application_handler = Mangum(application)
 admin_handler = Mangum(admin)
 signin_handler = Mangum(signin)
 bugs_handler = Mangum(bugs)
-
-bugs_list_handler = Mangum(bugs_list_router)
+bug_search_handler = Mangum(bugs_list_router)
 common_constants_handler = Mangum(common_constants_router)
 
 @application.get("/")

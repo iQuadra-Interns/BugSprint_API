@@ -3,13 +3,13 @@ from sqlalchemy.engine import Connection, create_engine
 from applications.common_constants.rq_rs.rq_all import DatabaseNameRequest
 from applications.common_constants.utils.all_utils import get_all_table_data, get_db_connection
 from applications.common_constants.rq_rs.rs_all import AllTablesDataResponse
-from config.database import ConnectionDetails
+from config.database import DatabaseDetails
 from typing import Generator
 
 router = APIRouter()
 
 def create_engine_for_db(database: str):
-    connection_string = f"{ConnectionDetails.database_type}://{ConnectionDetails.user_name}:{ConnectionDetails.password}@{ConnectionDetails.host}:{ConnectionDetails.port}/{database}"
+    connection_string = f"{DatabaseDetails.DB_TYPE}://{DatabaseDetails.USER}:{DatabaseDetails.PASS}@{DatabaseDetails.HOST}:{DatabaseDetails.PORT}/{database}"
     return create_engine(connection_string)
 
 def get_connection(database: str) -> Generator[Connection, None, None]:

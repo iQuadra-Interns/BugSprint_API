@@ -2,4 +2,4 @@ import os
 
 
 class Config:
-    pass
+    HASHING_SALT_ROUNDS = 12

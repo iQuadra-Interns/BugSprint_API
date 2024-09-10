@@ -9,10 +9,10 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 class Status(BaseModel):
-    sts: bool = False
-    err: Union[str, None] = "Operation failed"
-    war: Union[str, None] = None
-    msg: Union[str, None] = None
+    status: bool = False
+    error: str | None = "Operation failed"
+    warning: str | None = None
+    message: str | None = None
 
 
 class UserId(BaseModel):
@@ -20,8 +20,3 @@ class UserId(BaseModel):
     user_category: Union[str, None] = None
     user_cat_id: Union[int, None] = None
 
-
-class Status(BaseModel):
-    sts: bool
-    err: Optional[str] = None
-    msg: Optional[str] = None

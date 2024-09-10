@@ -25,7 +25,7 @@ if os.path.exists(existing_zip_file_path):
 
 # Zipping project excluding the special files and folder
 zip_file_path = os.path.join(project_folder, zip_name)
-folders_to_include = [folder for folder in os.listdir(project_folder) if folder not in excluded_folders]
+folders_to_include = tuple(folder for folder in os.listdir(project_folder) if folder not in excluded_folders)
 patoolib.create_archive(zip_name, folders_to_include, verbosity=-1)
 
 for LAMBDA_FUNCTION_NAME in LAMBDA_FUNCTIONS_LIST:

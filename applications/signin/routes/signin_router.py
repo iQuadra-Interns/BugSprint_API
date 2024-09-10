@@ -4,7 +4,7 @@ import logging
 
 from pydantic import EmailStr
 from sqlalchemy import create_engine, MetaData
-from config.database import ConnectionDetails
+from config.database import DatabaseDetails
 
 from applications.signin.rq_rs.rq_signin import SignInRq
 from applications.signin.rq_rs.rs_signin import SignInRs
@@ -22,6 +22,6 @@ signin_router = APIRouter()
     response_model_exclude_unset=True
 )
 def sign_in_info(rq: Request, sign_in: SignInRq) -> SignInRs:
-    engine = create_engine(ConnectionDetails.connection_string)
+    engine = create_engine(DatabaseDetails.CONN_STRING)
     user = fetch_complete_user_info(engine, sign_in)
     return user

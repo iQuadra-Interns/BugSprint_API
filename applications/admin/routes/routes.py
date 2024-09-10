@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import create_engine
-from config.database import ConnectionDetails
+from config.database import DatabaseDetails
 from applications.admin.rq_rs.admin_rq import UserInput
 from applications.admin.rq_rs.admin_rs import AddUserResponse
 from common.classes.generic import Status
@@ -16,7 +16,7 @@ add_user_router = APIRouter()
                       response_model_exclude_unset=True)
 def add_user_endpoint(user_info: UserInput) -> AddUserResponse:
     logger.info("Received request to add user")
-    engine = create_engine(ConnectionDetails.connection_string)
+    engine = create_engine(DatabaseDetails.CONN_STRING)
     resp=add_user_details(engine,user_info)
     return resp
 

@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy import Table, select, MetaData
 from sqlalchemy.exc import SQLAlchemyError
-from config.database import ConnectionDetails
+from config.database import DatabaseDetails
 from applications.bugs_list.rq_rs.rs_bugs_list import Status, BugsListResponse, BugsList
 
 # Configure logging
@@ -9,13 +9,13 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Initialize metadata
-metadata = ConnectionDetails.metadata
+metadata = DatabaseDetails.METADATA
 
 # Define the bugs_report table using existing metadata
 try:
     bugs_report = Table(
         'bugs_report', metadata,
-        autoload_with=ConnectionDetails.engine
+        autoload_with=DatabaseDetails.ENGINE
     )
     #logger.debug("Table 'bugs_report' loaded successfully")
 except SQLAlchemyError as e:
@@ -26,7 +26,7 @@ def fetch_bugs_list() -> BugsListResponse:
     query = select(bugs_report)
     try:
         #logger.debug("Executing query: %s", query)
-        with ConnectionDetails.engine.connect() as connection:
+        with DatabaseDetails.ENGINE.connect() as connection:
             result = connection.execute(query).fetchall()
             #logger.debug("Query executed successfully, processing results")
             bugs_list = [

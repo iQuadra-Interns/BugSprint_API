@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import Engine, MetaData, Table
 from sqlalchemy import select, and_
 import logging
-from config.database import ConnectionDetails, Tables
+from config.database import DatabaseDetails, Tables
 from applications.signin.rq_rs.rq_signin import SignInRq
 from applications.signin.rq_rs.rs_signin import PersonalDetails,SignInRs
 from common.classes.generic import Status, UserId
@@ -12,9 +12,14 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
-    metadata = MetaData(schema=ConnectionDetails.db_default_schema_name)
-    login_table = Table(Tables.USER_LOGIN_TABLE, metadata, autoload_with=engine)
+    metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
+    login_table = Table(Tables.USER_LOGIN_TABLE, DatabaseDetails.METADATA, autoload_with=engine)
 
+    # Step 1: Get the use type from users table if the user exists
+    query_get_user_type = select
+    # Step 2: Get the hashed password and other details from respective user_type_personal details
+
+    # Step 3: check if the hashed password matches and give appropriate response
     query_to_check_user_data = select(
         login_table.c.id,
         login_table.c.role,
@@ -41,18 +46,18 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
         }
 
         if user_info['role'] == 'developer':
-            table_to_access = Table(Tables.DEVELOPER_PERSONAL_DETAILS, metadata, autoload_with=engine)
+            table_to_access = Table(Tables.DEVELOPER_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
             details_field = 'developer_details'
         elif user_info['role'] == 'tester':
-            table_to_access = Table(Tables.TESTER_PERSONAL_DETAILS, metadata, autoload_with=engine)
+            table_to_access = Table(Tables.TESTER_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
             details_field = 'tester_details'
         elif user_info['role'] == 'admin':
-            table_to_access = Table(Tables.ADMIN_PERSONAL_DETAILS,metadata,autoload_with=engine)
+            table_to_access = Table(Tables.ADMIN_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
             details_field = 'admin_details'
         else:
             resp = SignInRs(
-                status=Status(sts=False, err=f"{status.HTTP_401_UNAUTHORIZED}",
-                              msg="Operation failed due to invalid role"))
+                status=Status(status=False, error=f"{status.HTTP_401_UNAUTHORIZED}",
+                              message="Operation failed due to invalid role"))
             return resp
 
 
@@ -85,17 +90,17 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
             )
 
             sign_in_response = SignInRs(
-                status=Status(sts=True, err="no error", msg="Operation successful"),
+                status=Status(status=True, error="no error", message="Operation successful"),
                 usr=user_id_obj,
             )
             setattr(sign_in_response, details_field, personal_details_obj)
 
             return sign_in_response
         else:
-            resp = SignInRs(status=Status(sts=True,err=f"{status.HTTP_404_NOT_FOUND}",msg="Operation failed because user personal details are misssing"))
+            resp = SignInRs(status=Status(status=True, error=f"{status.HTTP_404_NOT_FOUND}", message="Operation failed because user personal details are misssing"))
             return resp
     else:
         resp = SignInRs(
-            status=Status(sts=False, err=f"{status.HTTP_401_UNAUTHORIZED}", msg="Operation failed due to invalid credentials"))
+            status=Status(status=False, error=f"{status.HTTP_401_UNAUTHORIZED}", message="Operation failed due to invalid credentials"))
         return resp
         
