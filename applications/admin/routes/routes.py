@@ -16,7 +16,7 @@ add_user_router = APIRouter()
                       response_model_exclude_unset=True)
 def add_user_endpoint(user_info: UserInput) -> AddUserResponse:
     logger.info("Received request to add user")
-    engine = create_engine(DatabaseDetails.CONN_STRING)
+    engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     resp=add_user_details(engine,user_info)
     return resp
 
