@@ -12,7 +12,7 @@ AWS_ACCOUNT_PROFILE = EnvironmentDetails.AWS_ACCOUNT_PROFILE
 # Code Hyper-Params
 zip_name = "lambda-deploy.zip"
 
-excluded_folders = [".git", ".gitignore", ".idea", "__pycache__", ".env",
+excluded_folders = [".git", ".gitignore", ".idea", "__pycache__", ".env", "delete",
                     "README.md", "_MACOSX", ".DS_Store", "venv", "lambda-deploy.zip", "deploy_to_lambda.py",
                     "deploy_to_cloud.py", "environment_details.py", "delete.py", "test.py", "mainapp.log"]
 

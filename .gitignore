@@ -245,7 +245,7 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # Local files
-delete.py
+delete/delete.py
 test.py
 lambda-deploy.zip
 .idea/misc.xml
@@ -256,3 +256,4 @@ lambda-deploy.zip
 # Mac OS Files
 __MACOSX/
 
+/delete/
