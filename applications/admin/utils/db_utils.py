@@ -49,6 +49,7 @@ def add_user_details(engine: Engine, user_info: UserInput):
         email = user_info.email,
         hashed_password=pw,
         password=random_string,
+        previous_passwords=[],
         jobrole = user_info.jobrole,
         isd=user_info.isd,
         mobile_number=user_info.mobile_number
