@@ -17,7 +17,7 @@ bug_router = APIRouter()
                  response_model_exclude_unset=True)
 def add_bug_endpoint(bug_info: AddBugRq) -> AddBugResponse:
     logger.info("Received request to create bug")
-    engine = create_engine(DatabaseDetails.CONN_STRING)
+    engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     resp=add_bug(engine,bug_info)
     return resp
 
@@ -26,7 +26,7 @@ def add_bug_endpoint(bug_info: AddBugRq) -> AddBugResponse:
                  response_model_exclude_unset=True)
 def update_bug_endpoint(bug_id: int, bug_info: UpdateBugRq) -> UpdateBugResponse:
     logger.info("Received request to update bug with ID %s", bug_id)
-    engine = create_engine(DatabaseDetails.CONN_STRING)
+    engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     resp = update_bug(engine,bug_id,bug_info)
     return resp
 
@@ -35,6 +35,6 @@ def update_bug_endpoint(bug_id: int, bug_info: UpdateBugRq) -> UpdateBugResponse
                 response_model_exclude_unset=True)
 def find_bug_endpoint(bug_id: int) -> FindBugResponse:
     logger.info("Received request to find bug with ID %s", bug_id)
-    engine = create_engine(DatabaseDetails.CONN_STRING)
+    engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     resp = find_bug(engine, bug_id)
     return resp
