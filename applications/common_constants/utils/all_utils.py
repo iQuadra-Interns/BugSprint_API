@@ -1,45 +1,106 @@
-import sys
-import os
+import logging
+from sqlalchemy import Table, select
+from sqlalchemy.engine import Engine
+from sqlalchemy.exc import SQLAlchemyError
+from config.database import DatabaseDetails, Tables
+from common.classes.generic import Status
+from typing import Optional
+from applications.common_constants.rq_rs.rs_all import GetTableDataResponse
 
-sys.path.append('/home/sanju/Documents/Intern_work/BugSprint_API')
+logger = logging.getLogger(__name__)
 
-from sqlalchemy import inspect, text
-from sqlalchemy.engine import Connection, Engine
-from fastapi import HTTPException
-from typing import Generator, Dict, List, Any, Union
-from applications.common_constants.rq_rs.rs_all import Status
+def get_table_data(engine: Engine, table_name: Optional[str] = None):
+    logger.info("Fetching table data for table: %s", table_name if table_name else "all tables from common_constants")
 
-def get_db_connection(engine: Engine) -> Generator[Connection, None, None]:
-    connection = engine.connect()
+    # Define the common_constants table to retrieve the list of table names
+    common_constants_table = Table(Tables.CONSTANTS_TABLE_NAMES_TABLE, DatabaseDetails.METADATA, autoload_with=engine)
+
     try:
-        yield connection
-    finally:
-        connection.close()
+        with engine.begin() as connection:
+            # Query all table names in the common_constants table, using mappings() to get rows as dictionaries
+            all_tables_query = select(common_constants_table.c.table_name)
+            table_names = connection.execute(all_tables_query).mappings().fetchall()
 
-def get_all_table_data(connection: Connection) -> Dict[str, Union[Dict[str, List[Dict[str, Any]]], Status]]:
-    try:
-        inspector = inspect(connection)
-        table_names = inspector.get_table_names()
+            # Extract table names and normalize case for consistency
+            all_table_names = [row['table_name'].strip().lower() for row in table_names]
 
-        if not table_names:
-            raise HTTPException(status_code=404, detail="No tables found in the database")
+            logger.debug("Retrieved table names from common_constants: %s", all_table_names)
 
-        data = {}
-        for table_name in table_names:
-            try:
-                # Get the columns of the table
-                columns = [col['name'] for col in inspector.get_columns(table_name)]
+            # If no table_name is specified, fetch data from all tables listed in common_constants
+            if table_name is None:
+                if not all_table_names:
+                    logger.warning("No tables found in common_constants")
+                    return GetTableDataResponse(
+                        status=Status(status=False, error="404", message="No tables found in common_constants")
+                    )
 
-                # Execute the query to fetch all data
-                table_query = text(f"SELECT * FROM {table_name}")
-                result = connection.execute(table_query).fetchall()
+                data = {}
+                # Fetch data from each table listed in common_constants
+                for tbl_name_value in all_table_names:
+                    # Normalize the table name for lookup and log it
+                    tbl_name_normalized = tbl_name_value.upper() + "_TABLE"
+                    logger.debug("Attempting to access table: %s", tbl_name_normalized)
 
-                # Convert result to list of dictionaries
-                table_data = [dict(zip(columns, row)) for row in result]
-                data[table_name] = table_data
-            except Exception as e:
-                data[table_name] = f"Error fetching data: {e}"
+                    # Use getattr to dynamically access the corresponding table attribute from the Tables class
+                    tbl_name = getattr(Tables, tbl_name_normalized, None)
+                    if not tbl_name:
+                        logger.error(f"Table name '{tbl_name_value}' not found in Tables class.")
+                        continue
 
-        return {"status": Status(sts=True, msg="Fetched successfully"), "data": data}
-    except Exception as e:
-        return {"status": Status(sts=False, err=f"Error fetching data: {e}"), "data": {}}
+                    dynamic_table = Table(tbl_name, DatabaseDetails.METADATA, autoload_with=engine)
+                    fetch_data_query = select(dynamic_table)
+                    rows = connection.execute(fetch_data_query).mappings().fetchall()
+
+                    # Add data from each table to the response dictionary
+                    data[tbl_name_value] = [dict(row) for row in rows] if rows else []
+
+                return GetTableDataResponse(
+                    status=Status(status=True, error="no error", message="Operation successful"),
+                    data=data  # Dictionary of table names and their respective data
+                )
+
+            # Normalize the specific table name input for consistent matching
+            table_name_normalized = table_name.strip().lower()
+            logger.debug("Normalized user input table name: %s", table_name_normalized)
+
+            # Check if the specific table_name exists in the retrieved common_constants
+            if table_name_normalized not in all_table_names:
+                logger.warning(f"Table '{table_name}' not found in common_constants")
+                return GetTableDataResponse(
+                    status=Status(status=False, error="404",
+                                  message=f"Table '{table_name}' not found in common_constants")
+                )
+
+            # Use getattr to dynamically access the corresponding table attribute from Tables class
+            dynamic_table_name = getattr(Tables, table_name_normalized.upper() + "_TABLE", None)
+            if not dynamic_table_name:
+                logger.error(f"Table '{table_name}' not found in Tables class.")
+                return GetTableDataResponse(
+                    status=Status(status=False, error="404", message=f"Table '{table_name}' not found in Tables class")
+                )
+
+            # Fetch data from the specified table
+            dynamic_table = Table(dynamic_table_name, DatabaseDetails.METADATA, autoload_with=engine)
+            fetch_data_query = select(dynamic_table)
+            rows = connection.execute(fetch_data_query).mappings().fetchall()
+
+            if not rows:
+                logger.warning(f"No data found in table '{table_name}'")
+                return GetTableDataResponse(
+                    status=Status(status=False, error="404", message=f"No data found in table '{table_name}'")
+                )
+
+            data = [dict(row) for row in rows]
+
+            logger.info("Data fetched successfully from table: %s", table_name)
+
+            return GetTableDataResponse(
+                status=Status(status=True, error="no error", message="Operation successful"),
+                data=data  # List of rows from the specified table
+            )
+
+    except SQLAlchemyError as e:
+        logger.error("Error fetching data for table '%s': %s", table_name if table_name else "all tables", e)
+        return GetTableDataResponse(
+            status=Status(status=False, error="500", message="Database error occurred")
+        )

@@ -19,10 +19,6 @@ class DatabaseDetails:
 
 
 class Tables:
-    USER_LOGIN_TABLE = "user_details"
-    DEVELOPER_PERSONAL_DETAILS = "developer_details"
-    TESTER_PERSONAL_DETAILS = "tester_details"
-    ADMIN_PERSONAL_DETAILS = "admin_details"
 
     BUG_HISTORY_TABLE = "bug_history"
     BUG_STATUS_TABLE = "bug_status"
@@ -33,7 +29,7 @@ class Tables:
     ADMIN_PERSONAL_DETAILS = "personal_details_admin"
     DEVELOPER_PERSONAL_DETAILS = "personal_details_developer"
     TESTER_PERSONAL_DETAILS = "personal_details_tester"
-    PRIORITIES_TABLE = "priority"
+    PRIORITY_TABLE = "priority"
     PRODUCTS_TABLE = "products"
     ROOT_CAUSE_LOCATION_TABLE = "root_cause_location"
     SCENARIOS_TABLE = "scenarios"
