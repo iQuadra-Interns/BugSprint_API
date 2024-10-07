@@ -19,7 +19,6 @@ class DatabaseDetails:
 
 
 class Tables:
-
     BUG_HISTORY_TABLE = "bug_history"
     BUG_STATUS_TABLE = "bug_status"
     BUGS_TABLE = "bugs"
@@ -36,3 +35,12 @@ class Tables:
     TESTING_MEDIUM_TABLE = "testing_medium"
     USER_TYPES_TABLE = "user_types"
     USERS_TABLE = "users"
+
+
+class Views:
+    USER_DETAILS = "user_details"
+    USER_TYPE_TO_PERSONAL_DETAILS = {
+        "ADM": Tables.ADMIN_PERSONAL_DETAILS,
+        "DEV": Tables.DEVELOPER_PERSONAL_DETAILS,
+        "TES": Tables.TESTER_PERSONAL_DETAILS,
+    }
