@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+
 @router.post("/bugs_list", response_model=BugsListResponse)
 def get_bugs_list():
     try:
