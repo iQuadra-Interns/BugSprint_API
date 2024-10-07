@@ -1,14 +1,33 @@
-from fastapi import APIRouter
-from sqlalchemy import create_engine
-from config.database import DatabaseDetails  # Assuming this provides the DB engine
-from applications.common_constants.utils.all_utils import get_table_data  # Import the function from utils.py
-from applications.common_constants.rq_rs.rq_all import TableRequest  # Import the request model
-from applications.common_constants.rq_rs.rs_all import GetTableDataResponse  # Import the response model
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.engine import Connection, create_engine
+from applications.common_constants.rq_rs.rq_all import DatabaseNameRequest
+from applications.common_constants.utils.all_utils import get_all_table_data, get_db_connection
+from applications.common_constants.rq_rs.rs_all import AllTablesDataResponse
+from config.database import DatabaseDetails
+from typing import Generator
 
 router = APIRouter()
 
-@router.post("/fetch-table-data", response_model=GetTableDataResponse)
-def fetch_table_data(request: TableRequest):
-    engine = create_engine(DatabaseDetails.CONNECTION_STRING)
-    table_name = request.table_name.strip() if request.table_name and request.table_name != "string" else None
-    return get_table_data(engine,table_name)
+def create_engine_for_db(database: str):
+    connection_string = f"{DatabaseDetails.DB_TYPE}://{DatabaseDetails.USER}:{DatabaseDetails.PASS}@{DatabaseDetails.HOST}:{DatabaseDetails.PORT}/{database}"
+    return create_engine(connection_string)
+
+def get_connection(database: str) -> Generator[Connection, None, None]:
+    engine = create_engine_for_db(database)
+    connection = engine.connect()
+    try:
+        yield connection
+    finally:
+        connection.close()
+
+@router.post("/all_common_constants", response_model=AllTablesDataResponse)
+def get_all_table_data_endpoint(request: DatabaseNameRequest):
+    try:
+        connection = get_connection(request.database)
+        conn = next(connection)
+        response = get_all_table_data(conn)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch data: {e}")
+    finally:
+        conn.close()

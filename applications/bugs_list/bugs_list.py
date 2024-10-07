@@ -1,9 +1,13 @@
+import logging
 import sys
 
-sys.path.append("/mnt/efs/BugSprint_312/lib/python3.12/site-packages")
+sys.path.append("/mnt/python/lib")
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
+
 from applications.bugs_list.routes.bugs_list_routes import router as bugs_list_router
 
 

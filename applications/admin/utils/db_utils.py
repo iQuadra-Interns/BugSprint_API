@@ -7,53 +7,32 @@ from common.classes.generic import Status
 from applications.admin.rq_rs.admin_rs import AddUserResponse
 from typing import Optional
 from applications.admin.rq_rs.admin_rq import UserInput
-import random
-import string
-from passlib.context import CryptContext
-
 
 logger = logging.getLogger(__name__)
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-
-
 
 
 def add_user_details(engine: Engine, user_info: UserInput):
     logger.info("Adding user and personal details")
-    if user_info.jobrole == "admin":
-        personal_details_table = Table(Tables.ADMIN_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
-        users_type=2
-    elif user_info.jobrole == "developer":
-        personal_details_table = Table(Tables.DEVELOPER_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
-        users_type=3
-    elif user_info.jobrole == "tester":
-        personal_details_table = Table(Tables.TESTER_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
-        users_type=4
+    metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
+    if user_info.role == "admin":
+        personal_details_table = Table(Tables.ADMIN_PERSONAL_DETAILS, metadata, autoload_with=engine)
+    elif user_info.role == "developer":
+        personal_details_table = Table(Tables.DEVELOPER_PERSONAL_DETAILS, metadata, autoload_with=engine)
+    elif user_info.role == "tester":
+        personal_details_table = Table(Tables.TESTER_PERSONAL_DETAILS, metadata, autoload_with=engine)
     else:
         return AddUserResponse(
             status=Status(status=False, error="400",
                           message="Please mention the role of the user properly")
         )
-    random_string = ''.join(random.choices(string.ascii_letters, k=8))
-    pw = pwd_context.hash(random_string)
 
-    user_login_table = Table(Tables.USERS_TABLE,DatabaseDetails.METADATA, autoload_with=engine)
+    user_login_table = Table(Tables.USER_LOGIN_TABLE, metadata, autoload_with=engine)
 
     insert_personal_details_query = personal_details_table.insert().values(
         first_name=user_info.first_name,
-        middle_name=user_info.middle_name,
         last_name=user_info.last_name,
-        email = user_info.email,
-        hashed_password=pw,
-        password=random_string,
-        jobrole = user_info.jobrole,
-        isd=user_info.isd,
-        mobile_number=user_info.mobile_number
-
-
+        phone_no=user_info.phone_no,
+        role_of_the_user=user_info.role
     )
 
     try:
@@ -63,10 +42,10 @@ def add_user_details(engine: Engine, user_info: UserInput):
 
 
             insert_user_login_query = user_login_table.insert().values(
-
-                user_type = users_type,
-                user_category_id=category_id,
-                email=user_info.email
+                email=user_info.email,
+                password=user_info.password,
+                role=user_info.role,
+                category_id=category_id
             )
             connection.execute(insert_user_login_query)
             logger.info("User and personal details added successfully")

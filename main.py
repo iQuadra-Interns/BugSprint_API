@@ -1,24 +1,27 @@
 import sys
-
 sys.path.append("/mnt/efs/BugSprint_312/lib/python3.12/site-packages")
 
 import os
+import uvicorn
 from fastapi import FastAPI
 from fastapi.routing import Mount
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 import logging
 
+
 os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+
 
 # Ensure the applications are correctly imported
 
 from applications.admin.admin import admin
 
+
 from applications.signin.signin import signin
 from applications.bugs.bugs import bugs
 
-#from applications.bugs_list.bugs_list import bugs_list_router
+from applications.bugs_list.bugs_list import bugs_list_router
 from applications.common_constants.common_constants import common_constants_router
 
 # Configure logging
@@ -29,15 +32,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger('bug-sprint-logger')
 
-
 def add_applications():
     return [
         # Mount applications here
-        # Mount("/bugs_list", bugs_list_router),
+        
+        Mount("/bugs_list", bugs_list_router),
         Mount("/all_common_constants", common_constants_router),
         Mount("/admin", admin),
         Mount("/signin", signin),
-        Mount("/bugs", bugs)
+        Mount("/bugs",bugs)
+
 
     ]
 
@@ -56,16 +60,14 @@ def configure_application() -> FastAPI:
     )
     return app
 
-
 application = configure_application()
 application_handler = Mangum(application)
 
 admin_handler = Mangum(admin)
 signin_handler = Mangum(signin)
 bugs_handler = Mangum(bugs)
-# bug_search_handler = Mangum(bugs_list_router)
+bug_search_handler = Mangum(bugs_list_router)
 common_constants_handler = Mangum(common_constants_router)
-
 
 @application.get("/")
 def main_app():
@@ -75,3 +77,6 @@ def main_app():
         'msg': "You've reached main application of BugSprint. But you should not see this."
     }
     return resp
+
+if __name__ == '__main__':
+    uvicorn.run(application, host="127.0.0.1", port=8001)

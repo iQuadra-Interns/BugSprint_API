@@ -20,4 +20,3 @@ PyMySQL
 patool
 cryptography
 python-dotenv
-passlib
