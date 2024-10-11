@@ -102,8 +102,8 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
         jobrole=details_df.iloc[0]['jobrole'],
         isd=details_df.iloc[0]['isd'],
         mobile_number=details_df.iloc[0]['mobile_number'],
-        created_at=str(details_df.iloc[0]['created_at']),
-        last_updated=str(details_df.iloc[0]['last_updated'])
+        created_at=details_df.iloc[0]['created_at'],
+        last_updated=details_df.iloc[0]['last_updated']
     )
     hashed_pw = details_df.iloc[0]['hashed_password']
 
