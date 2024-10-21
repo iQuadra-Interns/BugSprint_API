@@ -2,6 +2,8 @@ import logging
 from sqlalchemy import MetaData, Table, insert
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
+
+from config.config import Config
 from config.database import Tables, DatabaseDetails
 from common.classes.generic import Status
 from applications.admin.rq_rs.admin_rs import AddUserResponse
@@ -9,19 +11,13 @@ from typing import Optional
 from applications.admin.rq_rs.admin_rq import UserInput
 import random
 import string
-from passlib.context import CryptContext
+import bcrypt
 
 
 logger = logging.getLogger(__name__)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-
-
-
-
 def add_user_details(engine: Engine, user_info: UserInput):
+
     logger.info("Adding user and personal details")
     if user_info.jobrole == "admin":
         personal_details_table = Table(Tables.ADMIN_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
@@ -37,8 +33,9 @@ def add_user_details(engine: Engine, user_info: UserInput):
             status=Status(status=False, error="400",
                           message="Please mention the role of the user properly")
         )
+    salt=bcrypt.gensalt(rounds=Config.HASHING_SALT_ROUNDS)
     random_string = ''.join(random.choices(string.ascii_letters, k=8))
-    pw = pwd_context.hash(random_string)
+    pw = bcrypt.hashpw(random_string.encode('utf-8'),salt)
 
     user_login_table = Table(Tables.USERS_TABLE,DatabaseDetails.METADATA, autoload_with=engine)
 
