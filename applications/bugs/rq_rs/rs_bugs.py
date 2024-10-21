@@ -28,6 +28,26 @@ class BugDetails(BaseModel):
     created_at:datetime | None = None
     updated_at:datetime | None = None
 
+class ViewBugDetails(BaseModel):
+    bug_id: int
+    product: str
+    environment: str
+    scenario: str
+    testing_medium: str
+    description: str
+    user_data: str | None = None
+    priority: str
+    reported_by: str
+    reported_at: datetime | None = None
+    assignee: str | None = None
+    root_cause_location: str
+    root_cause: str | None = None
+    resolution: str | None = None
+    status: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
 class FindBugResponse(BaseModel):
     status: Status
-    bug: BugDetails
+    bug_details: ViewBugDetails  | None = None
