@@ -8,11 +8,14 @@ from applications.signin.rq_rs.rq_signin import SignInRq
 from applications.signin.rq_rs.rs_signin import PersonalDetails, SignInRs
 from common.classes.generic import Status, UserId
 from passlib.context import CryptContext
+import bcrypt
 
 logging.basicConfig(level=logging.DEBUG)
 
 def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
 
+
+    result=False
     users_table = Table(Tables.USERS_TABLE, DatabaseDetails.METADATA, autoload_with=engine)
     query_get_user_info = select(
         users_table.c.user_id,
@@ -98,31 +101,23 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
         first_name=details_df.iloc[0]['first_name'],
         middle_name=details_df.iloc[0]['middle_name'],
         last_name=details_df.iloc[0]['last_name'],
-        email_id=details_df.iloc[0]['email'],
+        email=details_df.iloc[0]['email'],
         jobrole=details_df.iloc[0]['jobrole'],
         isd=details_df.iloc[0]['isd'],
         mobile_number=details_df.iloc[0]['mobile_number'],
         created_at=details_df.iloc[0]['created_at'],
         last_updated=details_df.iloc[0]['last_updated']
     )
-    hashed_pw = details_df.iloc[0]['hashed_password']
+    hashed_pw = details_df.iloc[0]['hashed_password'].encode('utf-8')
 
     user_id_obj = UserId(
         user_id=user_info['user_id'],
         user_category=user_type_name,
         user_cat_id=user_info['user_category_id']
     )
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-    class authentication():
-
-
-        def verify_password(self, plain_password, hashed_password):
-            k = pwd_context.verify(plain_password, hashed_password)
-            return k
-
-    auth = authentication()
-    result = auth.verify_password(sign_in_info.password,hashed_pw)
+    final_pw=sign_in_info.password.encode('utf-8')
+    if bcrypt.checkpw(final_pw,hashed_pw) :
+        result=True
     if result == True:
 
         if user_type_name == 'DEV':
