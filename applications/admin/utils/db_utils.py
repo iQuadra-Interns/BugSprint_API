@@ -2,16 +2,23 @@ import logging
 from sqlalchemy import MetaData, Table, insert
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
+
+from config.config import Config
 from config.database import Tables, DatabaseDetails
 from common.classes.generic import Status
 from applications.admin.rq_rs.admin_rs import AddUserResponse
 from typing import Optional
 from applications.admin.rq_rs.admin_rq import UserInput
 
+import random
+import string
+import bcrypt
+
+
 logger = logging.getLogger(__name__)
 
-
 def add_user_details(engine: Engine, user_info: UserInput):
+
     logger.info("Adding user and personal details")
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
     if user_info.role == "admin":
@@ -26,6 +33,10 @@ def add_user_details(engine: Engine, user_info: UserInput):
                           message="Please mention the role of the user properly")
         )
 
+    salt=bcrypt.gensalt(rounds=Config.HASHING_SALT_ROUNDS)
+    random_string = ''.join(random.choices(string.ascii_letters, k=8))
+    pw = bcrypt.hashpw(random_string.encode('utf-8'),salt)
+
     user_login_table = Table(Tables.USER_LOGIN_TABLE, metadata, autoload_with=engine)
 
     insert_personal_details_query = personal_details_table.insert().values(
@@ -33,6 +44,13 @@ def add_user_details(engine: Engine, user_info: UserInput):
         last_name=user_info.last_name,
         phone_no=user_info.phone_no,
         role_of_the_user=user_info.role
+        email = user_info.email,
+        hashed_password=pw,
+        password=random_string,
+        previous_passwords=[],
+        jobrole = user_info.jobrole,
+        isd=user_info.isd,
+        mobile_number=user_info.mobile_number
     )
 
     try:

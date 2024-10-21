@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Union
 
 from pydantic import BaseModel
@@ -11,11 +12,11 @@ class PersonalDetails(BaseModel):
     middle_name: str | None = None
     last_name: str | None = None
     email: str | None = None
-    job_role: str | None = None
+    jobrole: str | None = None
     isd: str | None = None
     mobile_number: str | None = None
-    created_at: str | None = None
-    last_updated: str | None = None
+    created_at: datetime | None = None
+    last_updated: datetime | None = None
 
 
 class SignInRs(BaseModel):
