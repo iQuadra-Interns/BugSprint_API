@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from applications.bugs.rq_rs.rq_bugs import AddBugRq , UpdateBugRq
 from common.classes.generic import Status
 from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse, BugDetails,ViewBugDetails
-from config.database import Tables, DatabaseDetails
+from config.database import Tables, DatabaseDetails, Views
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +165,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
     environments_table = Table(Tables.ENVIRONMENTS_TABLE, metadata, autoload_with=engine)
     scenarios_table = Table(Tables.SCENARIOS_TABLE, metadata, autoload_with=engine)
     testing_medium_table = Table(Tables.TESTING_MEDIUM_TABLE, metadata, autoload_with=engine)
-    user_details_table = Table(Tables.USER_DETAILS_TABLE, metadata, autoload_with=engine)
+    user_details_table = Table(Views.USER_DETAILS, metadata, autoload_with=engine)
     root_cause_location_table = Table(Tables.ROOT_CAUSE_LOCATION_TABLE, metadata, autoload_with=engine)
     bugs_status_table = Table(Tables.BUG_STATUS_TABLE, metadata, autoload_with=engine)
 

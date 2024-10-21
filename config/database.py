@@ -36,7 +36,6 @@ class Tables:
     TESTING_MEDIUM_TABLE = "testing_medium"
     USER_TYPES_TABLE = "user_types"
     USERS_TABLE = "users"
-    USER_DETAILS_TABLE="user_details"
     FORGOT_PASSWORD_OTP_STAGING_TABLE="forgot_password_otp_staging"
 
 
