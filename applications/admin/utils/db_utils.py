@@ -43,7 +43,7 @@ def add_user_details(engine: Engine, user_info: UserInput):
         first_name=user_info.first_name,
         last_name=user_info.last_name,
         phone_no=user_info.phone_no,
-        role_of_the_user=user_info.role
+        role_of_the_user=user_info.role,
         email = user_info.email,
         hashed_password=pw,
         password=random_string,
