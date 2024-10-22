@@ -54,7 +54,7 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
 
         print("Caught the error here.")
         logger.error(f"Error creating bug entry: {e}")
-        status = Status(status=False, error="500", message="Operation Failed")
+        status = Status(status=False, error="500", message="Enter Proper Bug Info")
         return AddBugResponse(status=status, bug_id=0)
 
 
@@ -161,7 +161,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
     bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
     products_table = Table(Tables.PRODUCTS_TABLE, metadata, autoload_with=engine)
-    priority_table = Table(Tables.PRIORITY_TABLE, metadata, autoload_with=engine)
+    priority_table = Table(Tables.PRIORITIES_TABLE, metadata, autoload_with=engine)
     environments_table = Table(Tables.ENVIRONMENTS_TABLE, metadata, autoload_with=engine)
     scenarios_table = Table(Tables.SCENARIOS_TABLE, metadata, autoload_with=engine)
     testing_medium_table = Table(Tables.TESTING_MEDIUM_TABLE, metadata, autoload_with=engine)
