@@ -19,4 +19,3 @@ def add_user_endpoint(user_info: UserInput) -> AddUserResponse:
     engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     resp=add_user_details(engine,user_info)
     return resp
-
