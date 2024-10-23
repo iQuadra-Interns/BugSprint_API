@@ -1,9 +1,8 @@
 import logging
-
 import pandas as pd
 from sqlalchemy import Table, select, MetaData
 from sqlalchemy.exc import SQLAlchemyError
-from config.database import DatabaseDetails
+from config.database import DatabaseDetails, Tables
 from applications.bugs_list.rq_rs.rs_bugs_list import Status, BugsListResponse, Bug
 
 # Configure logging
@@ -16,24 +15,27 @@ def fetch_bugs_list() -> BugsListResponse:
     # Define the bugs_report table using existing metadata
     try:
         bugs_report = Table(
-            'bugs_report', metadata,
+            Tables.BUGS_TABLE, metadata,
             autoload_with=DatabaseDetails.ENGINE
         )
-        # logger.debug("Table 'bugs_report' loaded successfully")
+        logger.debug("Table 'bugs_report' loaded successfully")
     except SQLAlchemyError as e:
-        # logger.error("Error loading table 'bugs_report': %s", e)
-        raise
+        logger.error("Error loading table 'bugs_report': %s", e)
+        return BugsListResponse(
+            status=Status(sts=False, err=f"Error loading table: {e}"),
+            data=[]
+        )
 
     query = select(bugs_report)
     try:
-        # logger.debug("Executing query: %s", query)
+        logger.debug("Executing query: %s", query)
         with DatabaseDetails.ENGINE.connect() as connection:
             result = pd.read_sql(query, connection)
-            # logger.debug("Query executed successfully, processing results")
+            logger.debug("Query executed successfully, processing results")
             bugs_list = []
             for index, row in result.iterrows():
                 bug = Bug(
-                    id=row["id"],
+                    id=row["bug_id"],
                     product=row["product"],
                     environment=row["environment"],
                     scenario=row["scenario"],
@@ -43,15 +45,16 @@ def fetch_bugs_list() -> BugsListResponse:
                     priority=row["priority"],
                     reported_by=row["reported_by"],
                     reported_at=row["reported_at"],
-                    assignee=row["assignee_id"],
-                    root_cause_location=row["route_cause_location"],
-                    root_cause=row["root_cause"],
-                    resolution=row["resolution"],
+                    assignee=row.get("assignee_id"),  # handle nulls
+                    root_cause_location=row.get("route_cause_location"),  # handle nulls
+                    root_cause=row.get("root_cause"),  # handle nulls
+                    resolution=row.get("resolution"),  # handle nulls
                     status=row["status"],
                     created_At=row["created_at"],
                     updated_At=row["updated_at"]
                 )
-                bugs_list.append(bug)
+
+                bugs_list.append(bug)  # Add bug to the list
             return BugsListResponse(
                 status=Status(sts=True, msg="Fetched successfully"),
                 bugs=bugs_list
@@ -63,7 +66,3 @@ def fetch_bugs_list() -> BugsListResponse:
             bugs=[]
         )
 
-
-# Example usage (for testing purposes)
-if __name__ == "__main__":
-    response = fetch_bugs_list()

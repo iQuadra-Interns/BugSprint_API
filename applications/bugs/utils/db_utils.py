@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 from fastapi import HTTPException,status
 from openpyxl.styles.builtins import warning
-from sqlalchemy import MetaData, Table, insert, update, select, create_engine, and_
+from sqlalchemy import MetaData, Table, insert, update, select, create_engine, and_, or_
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from applications.bugs.rq_rs.rq_bugs import AddBugRq , UpdateBugRq
@@ -168,6 +168,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
     user_details_table = Table(Views.USER_DETAILS, metadata, autoload_with=engine)
     root_cause_location_table = Table(Tables.ROOT_CAUSE_LOCATION_TABLE, metadata, autoload_with=engine)
     bugs_status_table = Table(Tables.BUG_STATUS_TABLE, metadata, autoload_with=engine)
+    user_details_table_copy = user_details_table.alias('user_details_table_copy')
 
     # # Query to select bug details
     select_bug_query = select(
@@ -179,7 +180,8 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
            bugs_table.c.description,
            bugs_table.c.user_data,
            priority_table.c.priority_name,
-           user_details_table.c.user_name,
+           user_details_table_copy.c.user_name.label('assignee_user_name'),
+           user_details_table.c.user_name.label('reported_user_name'),
            bugs_table.c.reported_at,
            bugs_table.c.assignee_id,
            root_cause_location_table.c.location_name,
@@ -194,9 +196,10 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
                                   ).join(testing_medium_table, bugs_table.c.testing_medium == testing_medium_table.c.medium_id
                                          ).join(priority_table, bugs_table.c.priority_id == priority_table.c.priority_id
                                                 ).join(user_details_table, bugs_table.c.reported_by == user_details_table.c.user_id
-                                                        ).join(root_cause_location_table,bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
-                                                               ).join(bugs_status_table,bugs_table.c.status == bugs_status_table.c.status_id
-                                                                     ).where(and_(bugs_table.c.bug_id == bug_id))
+                                                       ).join(user_details_table_copy, bugs_table.c.assignee_id == user_details_table_copy.c.user_id
+                                                            ).join(root_cause_location_table,bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
+                                                                   ).join(bugs_status_table,bugs_table.c.status == bugs_status_table.c.status_id
+                                                                         ).where(and_(bugs_table.c.bug_id == bug_id))
 
     try:
         with engine.begin() as connection:
@@ -222,9 +225,9 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
             description=result[0]['description'],
             user_data=result[0]['user_data'],
             priority=result[0]['priority_name'],
-            reported_by=result[0]['user_name'],
+            reported_by=result[0]['reported_user_name'],
             reported_at=result[0]['reported_at'],
-            assignee = c, # This will be replaced later
+            assignee = result[0]['assignee_user_name'], # This will be replaced later
             root_cause_location=result[0]['location_name'],
             root_cause=result[0]['root_cause'],
             resolution=result[0]['resolution'],
@@ -232,15 +235,6 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
             created_at=result[0]['created_at'],
             updated_at=result[0]['updated_at']
         )
-        change=int(bug_details.assignee)
-        # # # Second query to fetch the assignee name based on assignee_id
-        query2 = select(user_details_table.c.user_name).where(and_(
-        user_details_table.c.user_id == change))
-        with engine.begin() as connection:
-            assignee_result = pd.read_sql(query2, connection).to_dict('records')
-
-        if len(assignee_result)!=0:
-            bug_details.assignee = assignee_result[0]['user_name']
 
         status = Status(status=True, error=None, message="Bug found successfully")
         return FindBugResponse(status=status, bug_details=bug_details)
@@ -249,6 +243,5 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
         logger.error(f"Error finding bug entry: {e}")
         status = Status(status=False, error=str(e), message="Operation Failed")
         return FindBugResponse(status=status)
-
 
 

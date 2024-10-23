@@ -10,6 +10,7 @@ class Status(BaseModel):
     msg: Union[str, None] = None
 
 
+
 class Bug(BaseModel):
     id: Union[int, None] = None
     product: Union[str, None] = None
@@ -26,8 +27,8 @@ class Bug(BaseModel):
     root_cause: Union[str, None] = None
     resolution: Union[str, None] = None
     status: Union[str, None] = None
-    created_At: Union[str, None] = None
-    updated_At: Union[str, None] = None
+    created_at: Union[datetime, None] = None
+    updated_at: Union[datetime, None] = None
 
 
 class BugsListResponse(BaseModel):
