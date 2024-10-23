@@ -4,7 +4,6 @@ import pandas as pd
 from sqlalchemy import MetaData, Table, select, create_engine, outerjoin
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
-from common.classes.generic import Status as CommonStatus
 from config.database import Tables, DatabaseDetails, Views
 from applications.bugs_list.rq_rs.rs_bugs_list import Status, BugsListResponse, Bug
 
@@ -27,7 +26,6 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
     bugs_status_table = Table(Tables.BUG_STATUS_TABLE, metadata, autoload_with=engine)
     user_details_table_copy = user_details_table.alias('user_details_table_copy')
 
-    # Query to select bug details (using outerjoin to handle missing related data)
     select_bug_query = select(
         bugs_table.c.bug_id,
         products_table.c.product_name,
@@ -47,15 +45,15 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
         bugs_status_table.c.status_name,
         bugs_table.c.created_at,
         bugs_table.c.updated_at
-    ).join(products_table, bugs_table.c.product_id == products_table.c.product_id
-           ).join(environments_table, bugs_table.c.environment_id == environments_table.c.environment_id
-                  ).join(scenarios_table, bugs_table.c.scenario_id == scenarios_table.c.scenario_id
-                         ).join(testing_medium_table, bugs_table.c.testing_medium == testing_medium_table.c.medium_id
-                                ).join(priority_table, bugs_table.c.priority_id == priority_table.c.priority_id
-                                       ).join(user_details_table, bugs_table.c.reported_by == user_details_table.c.user_id
-                                              ).join(user_details_table_copy, bugs_table.c.assignee_id == user_details_table_copy.c.user_id
-                                                     ).join(root_cause_location_table, bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
-                                                            ).join(bugs_status_table, bugs_table.c.status == bugs_status_table.c.status_id)
+    ).outerjoin(products_table, bugs_table.c.product_id == products_table.c.product_id
+           ).outerjoin(environments_table, bugs_table.c.environment_id == environments_table.c.environment_id
+                  ).outerjoin(scenarios_table, bugs_table.c.scenario_id == scenarios_table.c.scenario_id
+                         ).outerjoin(testing_medium_table, bugs_table.c.testing_medium == testing_medium_table.c.medium_id
+                                ).outerjoin(priority_table, bugs_table.c.priority_id == priority_table.c.priority_id
+                                       ).outerjoin(user_details_table, bugs_table.c.reported_by == user_details_table.c.user_id
+                                              ).outerjoin(user_details_table_copy, bugs_table.c.assignee_id == user_details_table_copy.c.user_id
+                                                     ).outerjoin(root_cause_location_table, bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
+                                                            ).outerjoin(bugs_status_table, bugs_table.c.status == bugs_status_table.c.status_id)
 
     try:
         with engine.begin() as connection:
@@ -74,7 +72,7 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
         lst = []
         for i in result:
             bug_detail = Bug(
-                id=i['bug_id'],
+                bug_id=i['bug_id'],
                 product=i['product_name'],
                 environment=i['environment_name'],
                 scenario=i['scenario_name'],

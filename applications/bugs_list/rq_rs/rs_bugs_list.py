@@ -12,7 +12,7 @@ class Status(BaseModel):
 
 
 class Bug(BaseModel):
-    id: Union[int, None] = None
+    bug_id: Union[int, None] = None
     product: Union[str, None] = None
     environment: Union[str, None] = None
     scenario: Union[str, None] = None
