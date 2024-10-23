@@ -26,10 +26,10 @@ def fetch_bugs_list() -> BugsListResponse:
 
     query = select(bugs_report)
     try:
-        #logger.debug("Executing query: %s", query)
+        # logger.debug("Executing query: %s", query)
         with DatabaseDetails.ENGINE.connect() as connection:
             result = pd.read_sql(query, connection)
-            #logger.debug("Query executed successfully, processing results")
+            # logger.debug("Query executed successfully, processing results")
             bugs_list = []
             for index, row in result.iterrows():
                 bug = Bug(
@@ -51,16 +51,16 @@ def fetch_bugs_list() -> BugsListResponse:
                     created_At=row["created_at"],
                     updated_At=row["updated_at"]
                 )
-                logger.debug("Fetched bugs list: %s", bugs_list)
+                bugs_list.append(bug)
             return BugsListResponse(
                 status=Status(sts=True, msg="Fetched successfully"),
-                data=bugs_list
+                bugs=bugs_list
             )
     except SQLAlchemyError as e:
-        #logger.error("Error fetching bugs list: %s", e)
+        logger.error(f"Error fetching bugs list: {e}")
         return BugsListResponse(
             status=Status(sts=False, err=f"Error fetching bugs list: {e}"),
-            data=[]
+            bugs=[]
         )
 
 

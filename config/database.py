@@ -19,11 +19,6 @@ class DatabaseDetails:
 
 
 class Tables:
-    USER_LOGIN_TABLE = "user_details"
-    DEVELOPER_PERSONAL_DETAILS = "developer_details"
-    TESTER_PERSONAL_DETAILS = "tester_details"
-    ADMIN_PERSONAL_DETAILS = "admin_details"
-
     BUG_HISTORY_TABLE = "bug_history"
     BUG_STATUS_TABLE = "bug_status"
     BUGS_TABLE = "bugs"
@@ -40,7 +35,7 @@ class Tables:
     TESTING_MEDIUM_TABLE = "testing_medium"
     USER_TYPES_TABLE = "user_types"
     USERS_TABLE = "users"
-    FORGOT_PASSWORD_OTP_STAGING_TABLE="forgot_password_otp_staging"
+    FORGOT_PASSWORD_OTP_STAGING_TABLE = "forgot_password_otp_staging"
 
 
 class Views:
