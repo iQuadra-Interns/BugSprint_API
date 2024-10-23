@@ -21,7 +21,7 @@ class Bug(BaseModel):
     user_data: Union[str, None] = None
     priority: Union[str, None] = None
     reported_by: Union[str, None] = None
-    reported_at: Union[datetime.timestamp, None] = None
+    reported_at: Union[datetime, None] = None
     assignee: Union[str, None] = None
     root_cause_location: Union[str, None] = None
     root_cause: Union[str, None] = None
@@ -33,4 +33,4 @@ class Bug(BaseModel):
 
 class BugsListResponse(BaseModel):
     status: Status
-    bugs: list
+    bugs: list | None = None

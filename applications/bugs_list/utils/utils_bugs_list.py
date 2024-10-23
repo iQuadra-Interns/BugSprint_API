@@ -1,8 +1,11 @@
+import json
 import logging
 import pandas as pd
-from sqlalchemy import Table, select, MetaData
+from sqlalchemy import MetaData, Table, select, create_engine, outerjoin
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
-from config.database import DatabaseDetails, Tables
+from common.classes.generic import Status as CommonStatus
+from config.database import Tables, DatabaseDetails, Views
 from applications.bugs_list.rq_rs.rs_bugs_list import Status, BugsListResponse, Bug
 
 # Configure logging
@@ -10,59 +13,91 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def fetch_bugs_list() -> BugsListResponse:
-    metadata = DatabaseDetails.METADATA
-    # Define the bugs_report table using existing metadata
-    try:
-        bugs_report = Table(
-            Tables.BUGS_TABLE, metadata,
-            autoload_with=DatabaseDetails.ENGINE
-        )
-        logger.debug("Table 'bugs_report' loaded successfully")
-    except SQLAlchemyError as e:
-        logger.error("Error loading table 'bugs_report': %s", e)
-        return BugsListResponse(
-            status=Status(sts=False, err=f"Error loading table: {e}"),
-            data=[]
-        )
+def fetch_bugs_list(engine: Engine) -> BugsListResponse:
+    # Define metadata and tables
+    metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
+    bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
+    products_table = Table(Tables.PRODUCTS_TABLE, metadata, autoload_with=engine)
+    priority_table = Table(Tables.PRIORITIES_TABLE, metadata, autoload_with=engine)
+    environments_table = Table(Tables.ENVIRONMENTS_TABLE, metadata, autoload_with=engine)
+    scenarios_table = Table(Tables.SCENARIOS_TABLE, metadata, autoload_with=engine)
+    testing_medium_table = Table(Tables.TESTING_MEDIUM_TABLE, metadata, autoload_with=engine)
+    user_details_table = Table(Views.USER_DETAILS, metadata, autoload_with=engine)
+    root_cause_location_table = Table(Tables.ROOT_CAUSE_LOCATION_TABLE, metadata, autoload_with=engine)
+    bugs_status_table = Table(Tables.BUG_STATUS_TABLE, metadata, autoload_with=engine)
+    user_details_table_copy = user_details_table.alias('user_details_table_copy')
 
-    query = select(bugs_report)
-    try:
-        logger.debug("Executing query: %s", query)
-        with DatabaseDetails.ENGINE.connect() as connection:
-            result = pd.read_sql(query, connection)
-            logger.debug("Query executed successfully, processing results")
-            bugs_list = []
-            for index, row in result.iterrows():
-                bug = Bug(
-                    id=row["bug_id"],
-                    product=row["product"],
-                    environment=row["environment"],
-                    scenario=row["scenario"],
-                    testing_medium=row["testing_medium"],
-                    description=row["description"],
-                    user_data=row["user_data"],
-                    priority=row["priority"],
-                    reported_by=row["reported_by"],
-                    reported_at=row["reported_at"],
-                    assignee=row.get("assignee_id"),  # handle nulls
-                    root_cause_location=row.get("route_cause_location"),  # handle nulls
-                    root_cause=row.get("root_cause"),  # handle nulls
-                    resolution=row.get("resolution"),  # handle nulls
-                    status=row["status"],
-                    created_At=row["created_at"],
-                    updated_At=row["updated_at"]
-                )
+    # Query to select bug details (using outerjoin to handle missing related data)
+    select_bug_query = select(
+        bugs_table.c.bug_id,
+        products_table.c.product_name,
+        environments_table.c.environment_name,
+        scenarios_table.c.scenario_name,
+        testing_medium_table.c.medium_name,
+        bugs_table.c.description,
+        bugs_table.c.user_data,
+        priority_table.c.priority_name,
+        user_details_table_copy.c.user_name.label('assignee_user_name'),
+        user_details_table.c.user_name.label('reported_user_name'),
+        bugs_table.c.reported_at,
+        bugs_table.c.assignee_id,
+        root_cause_location_table.c.location_name,
+        bugs_table.c.root_cause,
+        bugs_table.c.resolution,
+        bugs_status_table.c.status_name,
+        bugs_table.c.created_at,
+        bugs_table.c.updated_at
+    ).join(products_table, bugs_table.c.product_id == products_table.c.product_id
+           ).join(environments_table, bugs_table.c.environment_id == environments_table.c.environment_id
+                  ).join(scenarios_table, bugs_table.c.scenario_id == scenarios_table.c.scenario_id
+                         ).join(testing_medium_table, bugs_table.c.testing_medium == testing_medium_table.c.medium_id
+                                ).join(priority_table, bugs_table.c.priority_id == priority_table.c.priority_id
+                                       ).join(user_details_table, bugs_table.c.reported_by == user_details_table.c.user_id
+                                              ).join(user_details_table_copy, bugs_table.c.assignee_id == user_details_table_copy.c.user_id
+                                                     ).join(root_cause_location_table, bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
+                                                            ).join(bugs_status_table, bugs_table.c.status == bugs_status_table.c.status_id)
 
-                bugs_list.append(bug)  # Add bug to the list
-            return BugsListResponse(
-                status=Status(sts=True, msg="Fetched successfully"),
-                bugs=bugs_list
+    try:
+        with engine.begin() as connection:
+            result = pd.read_sql(select_bug_query, connection).to_dict('records')
+
+
+        # Log the result for debugging
+        logger.debug(f"Query Result: {result}")
+
+        # If result is empty
+        if not result:
+            logger.warning("No bugs found.")
+            status = Status(sts=False, err="404", msg="No bugs found")
+            return BugsListResponse(status=status)
+
+        lst = []
+        for i in result:
+            bug_detail = Bug(
+                id=i['bug_id'],
+                product=i['product_name'],
+                environment=i['environment_name'],
+                scenario=i['scenario_name'],
+                testing_medium=i['medium_name'],
+                description=i['description'],
+                user_data=i['user_data'],
+                priority=i['priority_name'],
+                reported_by=i['reported_user_name'],
+                reported_at=i['reported_at'],
+                assignee=i['assignee_user_name'],
+                root_cause_location=i['location_name'],
+                root_cause=i['root_cause'],
+                resolution=i['resolution'],
+                status=i['status_name'],
+                created_at=i['created_at'],
+                updated_at=i['updated_at']
             )
-    except SQLAlchemyError as e:
-        logger.error(f"Error fetching bugs list: {e}")
-        return BugsListResponse(
-            status=Status(sts=False, err=f"Error fetching bugs list: {e}"),
-            bugs=[]
-        )
+            lst.append(bug_detail)
 
+        status = Status(sts=True, err=None, msg="Bugs fetched successfully")
+        return BugsListResponse(status=status, bugs=lst)
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error fetching bug entries: {e}")
+        status = Status(sts=False, err=str(e), msg="Operation Failed")
+        return BugsListResponse(status=status)

@@ -151,7 +151,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     except SQLAlchemyError as e:
         logger.error(f"Error updating bug entry: {e}")
         status = Status(status=False, error=str(e), message="Enter proper bug_info")
-        raise HTTPException(status_code=500, detail=status.dict())
+        return UpdateBugResponse(status=status)
 
 
 def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
@@ -212,8 +212,6 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
             status = Status(status=False, error="404", message="Bug not found")
             return FindBugResponse(status=status)
 
-        # # Access the first row safely
-        c=str(result[0]['assignee_id'])
 
         bug_details = ViewBugDetails(
 
