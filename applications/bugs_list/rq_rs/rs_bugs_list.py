@@ -10,8 +10,9 @@ class Status(BaseModel):
     msg: Union[str, None] = None
 
 
+
 class Bug(BaseModel):
-    id: Union[int, None] = None
+    bug_id: Union[int, None] = None
     product: Union[str, None] = None
     environment: Union[str, None] = None
     scenario: Union[str, None] = None
@@ -20,16 +21,16 @@ class Bug(BaseModel):
     user_data: Union[str, None] = None
     priority: Union[str, None] = None
     reported_by: Union[str, None] = None
-    reported_at: Union[datetime.timestamp, None] = None
+    reported_at: Union[datetime, None] = None
     assignee: Union[str, None] = None
     root_cause_location: Union[str, None] = None
     root_cause: Union[str, None] = None
     resolution: Union[str, None] = None
     status: Union[str, None] = None
-    created_At: Union[str, None] = None
-    updated_At: Union[str, None] = None
+    created_at: Union[datetime, None] = None
+    updated_at: Union[datetime, None] = None
 
 
 class BugsListResponse(BaseModel):
     status: Status
-    bugs: list
+    bugs: list | None = None
