@@ -28,7 +28,7 @@ class Tables:
     ADMIN_PERSONAL_DETAILS = "personal_details_admin"
     DEVELOPER_PERSONAL_DETAILS = "personal_details_developer"
     TESTER_PERSONAL_DETAILS = "personal_details_tester"
-    PRIORITIES_TABLE = "priority"
+    PRIORITY_TABLE = "priority"
     PRODUCTS_TABLE = "products"
     ROOT_CAUSE_LOCATION_TABLE = "root_cause_location"
     SCENARIOS_TABLE = "scenarios"
