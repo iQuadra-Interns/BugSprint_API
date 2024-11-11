@@ -47,16 +47,5 @@ def generate_random_password(length: int = 8) -> str:
     return password
 
 
-# def generate_otp(z: int = 0) -> tuple:
-#     if z == 0:
-#         return random.randint(100000, 999999), random.randint(10000000, 99999999)  # Both mobile and email OTPs
-#     if z == 1:
-#         return random.randint(100000, 999999), 0  # Only Mobile OTP
-#     if z == 2:
-#         return 0, random.randint(10000000, 99999999)  # Only Email OTP
-#     return 0, 0
-
-
-def generateOTP():
-    OTP = random.randint(100000,999999)
-    return OTP
+def generate_otp(size=6):
+    return random.randint(10 ** (size - 1), int("9" * size))
