@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from sqlalchemy import create_engine
 from applications.common_constants.rq_rs.reset_password_rq import ResetPasswordRq
 from applications.common_constants.rq_rs.reset_password_rs import ResetPasswordRs
@@ -23,4 +23,3 @@ def reset_password_endpoint(
     response = reset_password(engine, reset_pswd)
     engine.dispose()
     return response
-
