@@ -19,23 +19,23 @@ class DatabaseDetails:
 
 
 class Tables:
-    BUG_HISTORY_TABLE = "bug_history"
-    BUG_STATUS_TABLE = "bug_status"
+    BUG_HISTORY = "bug_history"
+    BUG_STATUS = "bug_status"
     BUGS_TABLE = "bugs"
     COMMENTS_TABLE = "comments"
     CONSTANTS_TABLE_NAMES_TABLE = "constant_table_names"
-    ENVIRONMENTS_TABLE = "environments"
+    ENVIRONMENTS = "environments"
     ADMIN_PERSONAL_DETAILS = "personal_details_admin"
     DEVELOPER_PERSONAL_DETAILS = "personal_details_developer"
     TESTER_PERSONAL_DETAILS = "personal_details_tester"
     PRIORITY_TABLE = "priority"
     PRODUCTS_TABLE = "products"
-    ROOT_CAUSE_LOCATION_TABLE = "root_cause_location"
-    SCENARIOS_TABLE = "scenarios"
-    TESTING_MEDIUM_TABLE = "testing_medium"
-    USER_TYPES_TABLE = "user_types"
-    USERS_TABLE = "users"
-    FORGOT_PASSWORD_OTP_STAGING_TABLE = "forgot_password_otp_staging"
+    ROOT_CAUSE_LOCATION = "root_cause_location"
+    SCENARIOS = "scenarios"
+    TESTING_MEDIUM = "testing_medium"
+    USER_TYPES = "user_types"
+    USERS = "users"
+    FORGOT_PASSWORD_OTP_STAGING = "forgot_password_otp_staging"
 
 
 class Views:

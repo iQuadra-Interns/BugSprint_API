@@ -37,7 +37,7 @@ def add_user_details(engine: Engine, user_info: UserInput):
     random_string = ''.join(random.choices(string.ascii_letters, k=8))
     pw = bcrypt.hashpw(random_string.encode('utf-8'),salt)
 
-    user_login_table = Table(Tables.USERS_TABLE,DatabaseDetails.METADATA, autoload_with=engine)
+    user_login_table = Table(Tables.USERS, DatabaseDetails.METADATA, autoload_with=engine)
 
     insert_personal_details_query = personal_details_table.insert().values(
         first_name=user_info.first_name,
