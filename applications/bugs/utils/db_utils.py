@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def add_bug(engine: Engine, bug_info: AddBugRq):
     logger.info("Creating a new bug entry")
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
+    bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
 
     insert_into_bugs_query = bugs_table.insert().values(
         product_id=bug_info.product_id,
@@ -59,7 +59,7 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
 def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     logger.info("Updating an existing bug entry")
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
+    bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
     bug_history = Table(Tables.BUG_HISTORY, metadata, autoload_with=engine)
     reviewer = True
 
@@ -158,15 +158,15 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
 
     # Define metadata and tables
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
-    products_table = Table(Tables.PRODUCTS_TABLE, metadata, autoload_with=engine)
-    priority_table = Table(Tables.PRIORITY_TABLE, metadata, autoload_with=engine)
-    environments_table = Table(Tables.ENVIRONMENTS_TABLE, metadata, autoload_with=engine)
-    scenarios_table = Table(Tables.SCENARIOS_TABLE, metadata, autoload_with=engine)
-    testing_medium_table = Table(Tables.TESTING_MEDIUM_TABLE, metadata, autoload_with=engine)
+    bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
+    products_table = Table(Tables.PRODUCTS, metadata, autoload_with=engine)
+    priority_table = Table(Tables.PRIORITY, metadata, autoload_with=engine)
+    environments_table = Table(Tables.ENVIRONMENTS, metadata, autoload_with=engine)
+    scenarios_table = Table(Tables.SCENARIOS, metadata, autoload_with=engine)
+    testing_medium_table = Table(Tables.TESTING_MEDIUM, metadata, autoload_with=engine)
     user_details_table = Table(Views.USER_DETAILS, metadata, autoload_with=engine)
-    root_cause_location_table = Table(Tables.ROOT_CAUSE_LOCATION_TABLE, metadata, autoload_with=engine)
-    bugs_status_table = Table(Tables.BUG_STATUS_TABLE, metadata, autoload_with=engine)
+    root_cause_location_table = Table(Tables.ROOT_CAUSE_LOCATION, metadata, autoload_with=engine)
+    bugs_status_table = Table(Tables.BUG_STATUS, metadata, autoload_with=engine)
     user_details_table_copy = user_details_table.alias('user_details_table_copy')
 
     # # Query to select bug details

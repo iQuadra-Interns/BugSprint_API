@@ -20,19 +20,19 @@ class DatabaseDetails:
 
 class Tables:
     BUG_HISTORY = "bug_history"
-    BUG_STATUS_TABLE = "bug_status"
-    BUGS_TABLE = "bugs"
-    COMMENTS_TABLE = "comments"
-    CONSTANTS_TABLE_NAMES_TABLE = "constant_table_names"
-    ENVIRONMENTS_TABLE = "environments"
-    ADMIN_PERSONAL_DETAILS = "personal_details_admin"
-    DEVELOPER_PERSONAL_DETAILS = "personal_details_developer"
-    TESTER_PERSONAL_DETAILS = "personal_details_tester"
-    PRIORITY_TABLE = "priority"
-    PRODUCTS_TABLE = "products"
-    ROOT_CAUSE_LOCATION_TABLE = "root_cause_location"
-    SCENARIOS_TABLE = "scenarios"
-    TESTING_MEDIUM_TABLE = "testing_medium"
+    BUG_STATUS = "bug_status"
+    BUGS = "bugs"
+    COMMENTS = "comments"
+    CONSTANTS_TABLE_NAMES = "constant_table_names"
+    ENVIRONMENTS = "environments"
+    PERSONAL_DETAILS_ADMIN = "personal_details_admin"
+    PERSONAL_DETAILS_DEVELOPER = "personal_details_developer"
+    PERSONAL_DETAILS_TESTER = "personal_details_tester"
+    PRIORITY = "priority"
+    PRODUCTS = "products"
+    ROOT_CAUSE_LOCATION = "root_cause_location"
+    SCENARIOS = "scenarios"
+    TESTING_MEDIUM = "testing_medium"
     USER_TYPES = "user_types"
     USERS = "users"
     FORGOT_PASSWORD_OTP_STAGING = "forgot_password_otp_staging"
@@ -41,7 +41,7 @@ class Tables:
 class Views:
     USER_DETAILS = "user_details"
     USER_TYPE_TO_PERSONAL_DETAILS = {
-        "ADM": Tables.ADMIN_PERSONAL_DETAILS,
-        "DEV": Tables.DEVELOPER_PERSONAL_DETAILS,
-        "TES": Tables.TESTER_PERSONAL_DETAILS,
+        "ADM": Tables.PERSONAL_DETAILS_ADMIN,
+        "DEV": Tables.PERSONAL_DETAILS_DEVELOPER,
+        "TES": Tables.PERSONAL_DETAILS_TESTER,
     }
