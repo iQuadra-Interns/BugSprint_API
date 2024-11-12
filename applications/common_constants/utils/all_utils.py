@@ -13,7 +13,7 @@ def get_table_data(engine: Engine, table_name: Optional[str] = None):
     logger.info("Fetching table data for table: %s", table_name if table_name else "all tables from common_constants")
 
     # Define the common_constants table to retrieve the list of table names
-    common_constants_table = Table(Tables.CONSTANTS_TABLE_NAMES_TABLE, DatabaseDetails.METADATA, autoload_with=engine)
+    common_constants_table = Table(Tables.CONSTANTS_TABLE_NAMES, DatabaseDetails.METADATA, autoload_with=engine)
 
     try:
         with engine.begin() as connection:
@@ -37,12 +37,10 @@ def get_table_data(engine: Engine, table_name: Optional[str] = None):
                 data = {}
                 # Fetch data from each table listed in common_constants
                 for tbl_name_value in all_table_names:
-                    # Normalize the table name for lookup and log it
-                    tbl_name_normalized = tbl_name_value.upper() + "_TABLE"
-                    logger.debug("Attempting to access table: %s", tbl_name_normalized)
+                    logger.debug("Attempting to access table: %s", tbl_name_value)
 
                     # Use getattr to dynamically access the corresponding table attribute from the Tables class
-                    tbl_name = getattr(Tables, tbl_name_normalized, None)
+                    tbl_name = getattr(Tables, tbl_name_value.upper(), None)
                     if not tbl_name:
                         logger.error(f"Table name '{tbl_name_value}' not found in Tables class.")
                         continue
@@ -72,7 +70,7 @@ def get_table_data(engine: Engine, table_name: Optional[str] = None):
                 )
 
             # Use getattr to dynamically access the corresponding table attribute from Tables class
-            dynamic_table_name = getattr(Tables, table_name_normalized.upper() + "_TABLE", None)
+            dynamic_table_name = getattr(Tables, table_name_normalized.upper(), None)
             if not dynamic_table_name:
                 logger.error(f"Table '{table_name}' not found in Tables class.")
                 return GetTableDataResponse(
