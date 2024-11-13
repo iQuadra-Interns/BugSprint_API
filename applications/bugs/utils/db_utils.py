@@ -23,6 +23,7 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
     insert_into_bugs_query = bugs_table.insert().values(
 
         product_id=bug_info.product_id,
+        title=bug_info.title,
         environment_id=bug_info.environment_id,
         scenario_id=bug_info.scenario_id,
         testing_medium=bug_info.testing_medium,
@@ -68,6 +69,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     # Select the current bug details
     qu = select(
         bugs_table.c.product_id,
+        bugs_table.c.title,
         bugs_table.c.environment_id,
         bugs_table.c.scenario_id,
         bugs_table.c.testing_medium,
@@ -85,6 +87,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     # Build update query
     update_bug_query = update(bugs_table).where(bugs_table.c.bug_id == bug_id).values(
         product_id=bug_info.product_id,
+        title=bug_info.title,
         environment_id=bug_info.environment_id,
         scenario_id=bug_info.scenario_id,
         testing_medium=bug_info.testing_medium,
@@ -161,7 +164,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
     bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
     products_table = Table(Tables.PRODUCTS_TABLE, metadata, autoload_with=engine)
-    priority_table = Table(Tables.PRIORITIES_TABLE, metadata, autoload_with=engine)
+    priority_table = Table(Tables.PRIORITY_TABLE, metadata, autoload_with=engine)
     environments_table = Table(Tables.ENVIRONMENTS_TABLE, metadata, autoload_with=engine)
     scenarios_table = Table(Tables.SCENARIOS_TABLE, metadata, autoload_with=engine)
     testing_medium_table = Table(Tables.TESTING_MEDIUM_TABLE, metadata, autoload_with=engine)
@@ -173,6 +176,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
     # # Query to select bug details
     select_bug_query = select(
            bugs_table.c.bug_id,
+           bugs_table.c.title,
            products_table.c.product_name,
            environments_table.c.environment_name,
            scenarios_table.c.scenario_name,
@@ -216,6 +220,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
         bug_details = ViewBugDetails(
 
             bug_id=result[0]['bug_id'],
+            title=result[0]['title'],
             product=result[0]['product_name'],
             environment=result[0]['environment_name'],
             scenario=result[0]['scenario_name'],

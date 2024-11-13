@@ -17,7 +17,7 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
     bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
     products_table = Table(Tables.PRODUCTS_TABLE, metadata, autoload_with=engine)
-    priority_table = Table(Tables.PRIORITIES_TABLE, metadata, autoload_with=engine)
+    priority_table = Table(Tables.PRIORITY_TABLE, metadata, autoload_with=engine)
     environments_table = Table(Tables.ENVIRONMENTS_TABLE, metadata, autoload_with=engine)
     scenarios_table = Table(Tables.SCENARIOS_TABLE, metadata, autoload_with=engine)
     testing_medium_table = Table(Tables.TESTING_MEDIUM_TABLE, metadata, autoload_with=engine)
@@ -28,6 +28,7 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
 
     select_bug_query = select(
         bugs_table.c.bug_id,
+        bugs_table.c.title,
         products_table.c.product_name,
         environments_table.c.environment_name,
         scenarios_table.c.scenario_name,
@@ -73,6 +74,7 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
         for i in result:
             bug_detail = Bug(
                 bug_id=i['bug_id'],
+                title=i['title'],
                 product=i['product_name'],
                 environment=i['environment_name'],
                 scenario=i['scenario_name'],

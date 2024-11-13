@@ -14,6 +14,7 @@ class UpdateBugResponse(BaseModel):
 
 class BugDetails(BaseModel):
     bug_id: int
+    title:str
     product_id: int
     environment_id: int
     scenario_id: int
@@ -34,6 +35,7 @@ class BugDetails(BaseModel):
 
 class ViewBugDetails(BaseModel):
     bug_id: int
+    title:str
     product: str
     environment: str
     scenario: str
