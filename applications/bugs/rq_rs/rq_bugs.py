@@ -5,6 +5,7 @@ from typing import Optional
 
 class AddBugRq(BaseModel):
     product_id: int
+    title:str
     environment_id: int
     scenario_id: int
     testing_medium: int
@@ -21,6 +22,7 @@ class AddBugRq(BaseModel):
 
 class UpdateBugRq(BaseModel):
     product_id: int
+    title:str
     environment_id: int
     scenario_id: int
     testing_medium: int

@@ -2,15 +2,14 @@ import json
 import logging
 
 import pandas as pd
-from fastapi import HTTPException, status
+from fastapi import HTTPException,status
 from openpyxl.styles.builtins import warning
 from sqlalchemy import MetaData, Table, insert, update, select, create_engine, and_, or_
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
-from applications.bugs.rq_rs.rq_bugs import AddBugRq, UpdateBugRq
+from applications.bugs.rq_rs.rq_bugs import AddBugRq , UpdateBugRq
 from common.classes.generic import Status
-from applications.bugs.rq_rs.rs_bugs import AddBugResponse, UpdateBugResponse, FindBugResponse, BugDetails, \
-    ViewBugDetails
+from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse, BugDetails,ViewBugDetails
 from config.database import Tables, DatabaseDetails, Views
 
 logger = logging.getLogger(__name__)
@@ -22,7 +21,9 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
     bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
 
     insert_into_bugs_query = bugs_table.insert().values(
+
         product_id=bug_info.product_id,
+        title=bug_info.title,
         environment_id=bug_info.environment_id,
         scenario_id=bug_info.scenario_id,
         testing_medium=bug_info.testing_medium,
@@ -66,6 +67,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     # Select the current bug details
     qu = select(
         bugs_table.c.product_id,
+        bugs_table.c.title,
         bugs_table.c.environment_id,
         bugs_table.c.scenario_id,
         bugs_table.c.testing_medium,
@@ -83,6 +85,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     # Build update query
     update_bug_query = update(bugs_table).where(bugs_table.c.bug_id == bug_id).values(
         product_id=bug_info.product_id,
+        title=bug_info.title,
         environment_id=bug_info.environment_id,
         scenario_id=bug_info.scenario_id,
         testing_medium=bug_info.testing_medium,
@@ -149,7 +152,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
 
     except SQLAlchemyError as e:
         logger.error(f"Error updating bug entry: {e}")
-        status = Status(status=False, error=str(e), message="Enter proper bug_info")
+        status = Status(status=False, error="values entered are invalid", message="Enter proper bug_info")
         return UpdateBugResponse(status=status)
 
 
@@ -171,38 +174,35 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
 
     # # Query to select bug details
     select_bug_query = select(
-        bugs_table.c.bug_id,
-        products_table.c.product_name,
-        environments_table.c.environment_name,
-        scenarios_table.c.scenario_name,
-        testing_medium_table.c.medium_name,
-        bugs_table.c.description,
-        bugs_table.c.user_data,
-        priority_table.c.priority_name,
-        user_details_table_copy.c.user_name.label('assignee_user_name'),
-        user_details_table.c.user_name.label('reported_user_name'),
-        bugs_table.c.reported_at,
-        bugs_table.c.assignee_id,
-        root_cause_location_table.c.location_name,
-        bugs_table.c.root_cause,
-        bugs_table.c.resolution,
-        bugs_status_table.c.status_name,
-        bugs_table.c.created_at,
-        bugs_table.c.updated_at
-    ).join(products_table, bugs_table.c.product_id == products_table.c.product_id
-           ).join(environments_table, bugs_table.c.environment_id == environments_table.c.environment_id
-                  ).join(scenarios_table, bugs_table.c.scenario_id == scenarios_table.c.scenario_id
-                         ).join(testing_medium_table, bugs_table.c.testing_medium == testing_medium_table.c.medium_id
-                                ).join(priority_table, bugs_table.c.priority_id == priority_table.c.priority_id
-                                       ).join(user_details_table,
-                                              bugs_table.c.reported_by == user_details_table.c.user_id
-                                              ).join(user_details_table_copy,
-                                                     bugs_table.c.assignee_id == user_details_table_copy.c.user_id
-                                                     ).join(root_cause_location_table,
-                                                            bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
-                                                            ).join(bugs_status_table,
-                                                                   bugs_table.c.status == bugs_status_table.c.status_id
-                                                                   ).where(and_(bugs_table.c.bug_id == bug_id))
+           bugs_table.c.bug_id,
+           bugs_table.c.title,
+           products_table.c.product_name,
+           environments_table.c.environment_name,
+           scenarios_table.c.scenario_name,
+           testing_medium_table.c.medium_name,
+           bugs_table.c.description,
+           bugs_table.c.user_data,
+           priority_table.c.priority_name,
+           user_details_table_copy.c.user_name.label('assignee_user_name'),
+           user_details_table.c.user_name.label('reported_user_name'),
+           bugs_table.c.reported_at,
+           bugs_table.c.assignee_id,
+           root_cause_location_table.c.location_name,
+           bugs_table.c.root_cause,
+           bugs_table.c.resolution,
+           bugs_status_table.c.status_name,
+           bugs_table.c.created_at,
+           bugs_table.c.updated_at
+             ).join(products_table, bugs_table.c.product_id == products_table.c.product_id
+                    ).join(environments_table, bugs_table.c.environment_id == environments_table.c.environment_id
+                           ).join(scenarios_table, bugs_table.c.scenario_id == scenarios_table.c.scenario_id
+                                  ).join(testing_medium_table, bugs_table.c.testing_medium == testing_medium_table.c.medium_id
+                                         ).join(priority_table, bugs_table.c.priority_id == priority_table.c.priority_id
+                                                ).join(user_details_table, bugs_table.c.reported_by == user_details_table.c.user_id
+                                                       ).join(user_details_table_copy, bugs_table.c.assignee_id == user_details_table_copy.c.user_id
+                                                            ).join(root_cause_location_table,bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
+                                                                   ).join(bugs_status_table,bugs_table.c.status == bugs_status_table.c.status_id
+                                                                         ).where(and_(bugs_table.c.bug_id == bug_id))
 
     try:
         with engine.begin() as connection:
@@ -217,6 +217,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
         bug_details = ViewBugDetails(
 
             bug_id=result[0]['bug_id'],
+            title=result[0]['title'],
             product=result[0]['product_name'],
             environment=result[0]['environment_name'],
             scenario=result[0]['scenario_name'],
@@ -240,5 +241,5 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
 
     except SQLAlchemyError as e:
         logger.error(f"Error finding bug entry: {e}")
-        status = Status(status=False, error=str(e), message="Operation Failed")
+        status = Status(status=False, error="fetching data failed", message="Operation Failed")
         return FindBugResponse(status=status)
