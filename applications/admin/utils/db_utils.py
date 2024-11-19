@@ -20,13 +20,13 @@ def add_user_details(engine: Engine, user_info: UserInput):
 
     logger.info("Adding user and personal details")
     if user_info.jobrole == "admin":
-        personal_details_table = Table(Tables.ADMIN_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
+        personal_details_table = Table(Tables.PERSONAL_DETAILS_ADMIN, DatabaseDetails.METADATA, autoload_with=engine)
         users_type=2
     elif user_info.jobrole == "developer":
-        personal_details_table = Table(Tables.DEVELOPER_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
+        personal_details_table = Table(Tables.PERSONAL_DETAILS_DEVELOPER, DatabaseDetails.METADATA, autoload_with=engine)
         users_type=3
     elif user_info.jobrole == "tester":
-        personal_details_table = Table(Tables.TESTER_PERSONAL_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
+        personal_details_table = Table(Tables.PERSONAL_DETAILS_TESTER, DatabaseDetails.METADATA, autoload_with=engine)
         users_type=4
     else:
         return AddUserResponse(
@@ -37,7 +37,7 @@ def add_user_details(engine: Engine, user_info: UserInput):
     random_string = ''.join(random.choices(string.ascii_letters, k=8))
     pw = bcrypt.hashpw(random_string.encode('utf-8'),salt)
 
-    user_login_table = Table(Tables.USERS_TABLE,DatabaseDetails.METADATA, autoload_with=engine)
+    user_login_table = Table(Tables.USERS, DatabaseDetails.METADATA, autoload_with=engine)
 
     insert_personal_details_query = personal_details_table.insert().values(
         first_name=user_info.first_name,

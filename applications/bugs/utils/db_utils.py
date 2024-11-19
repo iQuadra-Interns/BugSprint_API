@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def add_bug(engine: Engine, bug_info: AddBugRq):
     logger.info("Creating a new bug entry")
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
+    bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
 
     insert_into_bugs_query = bugs_table.insert().values(
 
@@ -38,33 +38,31 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
         status=bug_info.status
     )
 
+    status = Status(status=False, error="Bug creation Unsuccessful", message=None)
+    response = AddBugResponse(status=status, bug_id=-1)
     try:
         with engine.begin() as connection:
             res = connection.execute(insert_into_bugs_query)
             bug_id = res.inserted_primary_key[0]
-            print(bug_id)
-            logger.info("Bug entry created successfully")
-            if bug_id is None:
-                print("If bug id is none.")
-                status = Status(status=False, error="500", message="Operation Failed")
-                return AddBugResponse(status=status, bug_id=0)
-
-            status = Status(status=True, error="null", message="Bug created successfully")
-            return AddBugResponse(status=status, bug_id=bug_id)
+            logger.info(f"Bug entry created successfully: {bug_id}")
+            if bug_id:
+                response = AddBugResponse(
+                    status=Status(status=True, error=None, message="Bug Created Successfully"),
+                    bug_id=bug_id
+                )
     except SQLAlchemyError as e:
-
-        print("Caught the error here.")
         logger.error(f"Error creating bug entry: {e}")
-        status = Status(status=False, error="500", message="Enter Proper Bug Info")
-        return AddBugResponse(status=status, bug_id=0)
+        response = AddBugResponse(status=Status(status=False, error="500", message="Enter Proper Bug Info"), bug_id=-1)
+    finally:
+        return response
 
 
 def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     logger.info("Updating an existing bug entry")
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
-    bug_history = Table(Tables.BUG_HISTORY_TABLE, metadata, autoload_with=engine)
-    reviewer=True
+    bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
+    bug_history = Table(Tables.BUG_HISTORY, metadata, autoload_with=engine)
+    reviewer = True
 
     # Select the current bug details
     qu = select(
@@ -105,7 +103,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     try:
         with engine.begin() as connection:
             # Fetch current bug data
-            old_values_list = pd.read_sql(qu, connection).to_dict('records') # Extract the first record
+            old_values_list = pd.read_sql(qu, connection).to_dict('records')  # Extract the first record
             if not old_values_list:
                 logger.warning("No bug entry found with the given ID")
                 status = Status(status=False, error="404", message="Enter proper bug_id")
@@ -138,15 +136,16 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
                 final_res = connection.execute(q2)
 
         else:
-            reviewer=False
+            reviewer = False
 
-        if reviewer==True:
+        if reviewer == True:
 
             logger.info("Bug entry updated successfully")
             status = Status(status=True, error=None, message=f"Bug updated successfully with id: {bug_id}")
             return UpdateBugResponse(status=status)
-        elif reviewer==False:
-            status = Status(status=True, error=" ",warning="no changes detected", message="not inserted into bug_history")
+        elif reviewer == False:
+            status = Status(status=True, error=" ", warning="no changes detected",
+                            message="not inserted into bug_history")
             return UpdateBugResponse(status=status)
 
 
@@ -162,15 +161,15 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
 
     # Define metadata and tables
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    bugs_table = Table(Tables.BUGS_TABLE, metadata, autoload_with=engine)
-    products_table = Table(Tables.PRODUCTS_TABLE, metadata, autoload_with=engine)
-    priority_table = Table(Tables.PRIORITY_TABLE, metadata, autoload_with=engine)
-    environments_table = Table(Tables.ENVIRONMENTS_TABLE, metadata, autoload_with=engine)
-    scenarios_table = Table(Tables.SCENARIOS_TABLE, metadata, autoload_with=engine)
-    testing_medium_table = Table(Tables.TESTING_MEDIUM_TABLE, metadata, autoload_with=engine)
+    bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
+    products_table = Table(Tables.PRODUCTS, metadata, autoload_with=engine)
+    priority_table = Table(Tables.PRIORITY, metadata, autoload_with=engine)
+    environments_table = Table(Tables.ENVIRONMENTS, metadata, autoload_with=engine)
+    scenarios_table = Table(Tables.SCENARIOS, metadata, autoload_with=engine)
+    testing_medium_table = Table(Tables.TESTING_MEDIUM, metadata, autoload_with=engine)
     user_details_table = Table(Views.USER_DETAILS, metadata, autoload_with=engine)
-    root_cause_location_table = Table(Tables.ROOT_CAUSE_LOCATION_TABLE, metadata, autoload_with=engine)
-    bugs_status_table = Table(Tables.BUG_STATUS_TABLE, metadata, autoload_with=engine)
+    root_cause_location_table = Table(Tables.ROOT_CAUSE_LOCATION, metadata, autoload_with=engine)
+    bugs_status_table = Table(Tables.BUG_STATUS, metadata, autoload_with=engine)
     user_details_table_copy = user_details_table.alias('user_details_table_copy')
 
     # # Query to select bug details
@@ -209,13 +208,11 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
         with engine.begin() as connection:
             result = pd.read_sql(select_bug_query, connection).to_dict('records')
 
-
         # # Check if the result is empty
-        if len(result)==0:
+        if len(result) == 0:
             logger.warning("No bug entry found with the given ID %s", bug_id)
             status = Status(status=False, error="404", message="Bug not found")
             return FindBugResponse(status=status)
-
 
         bug_details = ViewBugDetails(
 
@@ -230,7 +227,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
             priority=result[0]['priority_name'],
             reported_by=result[0]['reported_user_name'],
             reported_at=result[0]['reported_at'],
-            assignee = result[0]['assignee_user_name'], # This will be replaced later
+            assignee=result[0]['assignee_user_name'],  # This will be replaced later
             root_cause_location=result[0]['location_name'],
             root_cause=result[0]['root_cause'],
             resolution=result[0]['resolution'],
@@ -246,5 +243,3 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
         logger.error(f"Error finding bug entry: {e}")
         status = Status(status=False, error=str(e), message="Operation Failed")
         return FindBugResponse(status=status)
-
-

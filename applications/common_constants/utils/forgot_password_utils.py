@@ -5,7 +5,7 @@ from pydantic import EmailStr
 from sqlalchemy import MetaData, Table, select, and_, create_engine
 from sqlalchemy.engine import Engine
 from common.classes.generic import Status, UserId
-from common.utilities.miscellaneous import generateOTP
+from common.utilities.miscellaneous import generate_otp
 from applications.common_constants.rq_rs.forgot_password_rq import ForgotPasswordRq, ForgotPasswordGenerateOTPRq, \
     ForgotPasswordVerifyEmailRq
 from applications.common_constants.rq_rs.forgot_password_rs import ForgotPasswordRs, UserLoginRs, UserLogin
@@ -50,7 +50,7 @@ def check_login(eng: Engine, login: EmailStr) -> UserLoginRs:
 def fetch_forgot_staging_record(eng: Engine, forgot_pswd: ForgotPasswordGenerateOTPRq) -> int:
     engine = create_engine(DatabaseDetails.CONNECTION_STRING, echo=False)
     metadata = MetaData(DatabaseDetails.DEFAULT_SCHEMA)
-    forgot_pswd_staging_table = Table(Tables.FORGOT_PASSWORD_OTP_STAGING_TABLE, metadata, autoload_with=engine)
+    forgot_pswd_staging_table = Table(Tables.FORGOT_PASSWORD_OTP_STAGING, metadata, autoload_with=engine)
     max_id_stmt = select(
         sqlalchemy.func.count(forgot_pswd_staging_table.c.id).label('count')
     ).where(and_(forgot_pswd_staging_table.c.user_category_id == forgot_pswd.userid.user_cat_id,
@@ -68,9 +68,9 @@ def update_user_info_in_staging_tbl(eng: Engine, forgot_pswd: ForgotPasswordGene
         status=Status(),
         userid=forgot_pswd.userid
     )
-    email_otp = generateOTP()
+    email_otp = generate_otp()
     user_metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    forgot_pswd_staging_table = Table(Tables.FORGOT_PASSWORD_OTP_STAGING_TABLE, user_metadata, autoload_with=eng)
+    forgot_pswd_staging_table = Table(Tables.FORGOT_PASSWORD_OTP_STAGING, user_metadata, autoload_with=eng)
     count = fetch_forgot_staging_record(eng, forgot_pswd)
     if count == 0:
         forgot_staging_query = forgot_pswd_staging_table.insert().values(
@@ -111,7 +111,7 @@ def verify_forgot_password_email_otp(eng: Engine, forgot_pswd: ForgotPasswordVer
         userid=forgot_pswd.userid
     )
     user_metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    forgot_pswd_staging_table = Table(Tables.FORGOT_PASSWORD_OTP_STAGING_TABLE, user_metadata, autoload_with=eng)
+    forgot_pswd_staging_table = Table(Tables.FORGOT_PASSWORD_OTP_STAGING, user_metadata, autoload_with=eng)
     select_query = select(
         forgot_pswd_staging_table.c.user_category_id,
         forgot_pswd_staging_table.c.category,
@@ -146,7 +146,7 @@ def forgot_password_information(eng: Engine, forgot_pswd: ForgotPasswordRq) -> F
         user=forgot_pswd.userid
     )
     user_metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
-    forgot_pswd_staging_table = Table(Tables.FORGOT_PASSWORD_OTP_STAGING_TABLE, user_metadata, autoload_with=eng)
+    forgot_pswd_staging_table = Table(Tables.FORGOT_PASSWORD_OTP_STAGING, user_metadata, autoload_with=eng)
     role_table = Table(Views.USER_TYPE_TO_PERSONAL_DETAILS[forgot_pswd.userid.user_category], user_metadata, autoload_with=eng)
     select_user_query = select(
         role_table.c.password
