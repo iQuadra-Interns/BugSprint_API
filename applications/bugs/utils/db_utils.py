@@ -152,7 +152,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
 
     except SQLAlchemyError as e:
         logger.error(f"Error updating bug entry: {e}")
-        status = Status(status=False, error=str(e), message="Enter proper bug_info")
+        status = Status(status=False, error="values entered are invalid", message="Enter proper bug_info")
         return UpdateBugResponse(status=status)
 
 
@@ -241,5 +241,5 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
 
     except SQLAlchemyError as e:
         logger.error(f"Error finding bug entry: {e}")
-        status = Status(status=False, error=str(e), message="Operation Failed")
+        status = Status(status=False, error="fetching data failed", message="Operation Failed")
         return FindBugResponse(status=status)
