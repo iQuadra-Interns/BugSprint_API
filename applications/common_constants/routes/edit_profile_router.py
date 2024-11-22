@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 edit_profile_router = APIRouter()
 
 
-@edit_profile_router.put("/api/edit-profile/{user_i}", response_model=EditProfileResponse)
+@edit_profile_router.put("/api/edit-profile/{user_id}", response_model=EditProfileResponse)
 def edit_profile_endpoint(
         user_id: int,
         profile_data: EditProfileRequest
