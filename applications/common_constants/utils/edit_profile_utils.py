@@ -85,6 +85,10 @@ def edit_user_profile(engine: Engine, user_id: int, user_info) -> EditProfileRes
                 resp.status.status = False
                 return resp
 
+
+        resp.status.status = True
+        resp.status.error = ""
+        resp.status.message = "Updated profile successfully"
         resp.first_name = updated_user["first_name"] or ""
         resp.middle_name = updated_user["middle_name"] or ""
         resp.last_name = updated_user["last_name"] or ""
