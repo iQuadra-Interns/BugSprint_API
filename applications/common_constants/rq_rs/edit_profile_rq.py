@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class EditProfileRequest(BaseModel):
-    first_name: str
-    middle_name: str
-    last_name: str
-    mobile_number: str
+    first_name: str | None = None
+    middle_name: str | None = None
+    last_name: str | None = None
+    mobile_number: str | None = None
