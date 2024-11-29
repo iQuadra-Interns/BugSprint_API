@@ -80,6 +80,7 @@ def reset_password(engine: Engine, reset_pswd: ResetPasswordRq) -> ResetPassword
 
         update_password_query = update(users_table).values(
             hashed_password=new_password_hash.decode('utf-8'),
+            password=new_password,
             previous_passwords=previous_passwords
         ).where(and_(
             users_table.c.id == user_cat_id,

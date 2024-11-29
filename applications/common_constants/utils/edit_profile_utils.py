@@ -13,11 +13,13 @@ def edit_user_profile(engine: Engine, user_id: int, user_info) -> EditProfileRes
     resp = EditProfileResponse(status=Status())
 
     try:
-        with engine.connect() as connection:
+
+        with engine.begin() as connection:
             logger.info(f"Fetching user_type and email for user_id: {user_id}")
             user_details_view = Table(
                 "user_details", DatabaseDetails.METADATA, autoload_with=engine
             )
+
 
             user_query = select(
                 user_details_view.c.user_type,
@@ -28,19 +30,22 @@ def edit_user_profile(engine: Engine, user_id: int, user_info) -> EditProfileRes
 
             if not user_record:
                 logger.error(f"No user found for user_id: {user_id}")
-                resp.status.error = "No user found."
+                resp.status.error = "User not found."
                 resp.status.status = False
                 return resp
 
+
             user_type = user_record["user_type"]
             email = user_record["email"]
-            logger.info(f"User type fetched: {user_type}, Email: {email}")
+            logger.info(f"User type: {user_type}, Email: {email}")
+
 
             if user_type not in Views.USER_TYPE_TO_PERSONAL_DETAILS:
                 logger.error(f"Invalid user type: {user_type}")
                 resp.status.error = "Invalid user type."
                 resp.status.status = False
                 return resp
+
 
             role_table = Table(
                 Views.USER_TYPE_TO_PERSONAL_DETAILS[user_type],
@@ -60,16 +65,16 @@ def edit_user_profile(engine: Engine, user_id: int, user_info) -> EditProfileRes
                     mobile_number=user_info.mobile_number,
                 )
             )
+            update_result = connection.execute(update_query)
 
-            result = connection.execute(update_query)
-
-            if result.rowcount == 0:
+            if update_result.rowcount == 0:
                 logger.error(f"No records updated for email: {email}")
                 resp.status.error = "Update failed; no records updated."
                 resp.status.status = False
                 return resp
 
-            logger.info(f"Fetching updated data from table: {role_table.name}")
+
+            logger.info(f"Fetching updated profile from table: {role_table.name}")
             fetch_query = select(
                 role_table.c.first_name,
                 role_table.c.middle_name,
@@ -88,7 +93,7 @@ def edit_user_profile(engine: Engine, user_id: int, user_info) -> EditProfileRes
 
         resp.status.status = True
         resp.status.error = ""
-        resp.status.message = "Updated profile successfully"
+        resp.status.message = "Profile updated successfully."
         resp.first_name = updated_user["first_name"] or ""
         resp.middle_name = updated_user["middle_name"] or ""
         resp.last_name = updated_user["last_name"] or ""
@@ -97,12 +102,11 @@ def edit_user_profile(engine: Engine, user_id: int, user_info) -> EditProfileRes
 
     except SQLAlchemyError as e:
         logger.error(f"SQLAlchemy error occurred: {e}")
-        resp.status.error = "Database error."
+        resp.status.error = "Database error occurred."
         resp.status.status = False
         return resp
-
     except Exception as e:
-        logger.error(f"Unexpected error occurred: {e}")
-        resp.status.error = "Unexpected error."
+        logger.error(f"Unexpected error: {e}")
+        resp.status.error = "Unexpected error occurred."
         resp.status.status = False
         return resp
