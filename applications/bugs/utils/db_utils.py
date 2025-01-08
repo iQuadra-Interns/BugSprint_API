@@ -77,8 +77,6 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
                 connection.execute(update_bug_query)
 
                 logger.info(f"Updated bug_code for bug_id {bug_id} to {bug_code}")
-
-                # Step 5: Prepare the successful response
                 response = AddBugResponse(
                     status=Status(status=True, error=None, message="Bug Created Successfully"),
                     bug_id=bug_id
