@@ -19,9 +19,9 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
     logger.info("Creating a new bug entry")
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
     bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
+    products_table = Table(Tables.PRODUCTS, metadata, autoload_with=engine)
 
     insert_into_bugs_query = bugs_table.insert().values(
-
         product_id=bug_info.product_id,
         title=bug_info.title,
         environment_id=bug_info.environment_id,
@@ -40,21 +40,61 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
 
     status = Status(status=False, error="Bug creation Unsuccessful", message=None)
     response = AddBugResponse(status=status, bug_id=-1)
+
     try:
         with engine.begin() as connection:
             res = connection.execute(insert_into_bugs_query)
             bug_id = res.inserted_primary_key[0]
+
+            if not bug_id:
+                logger.error("Failed to retrieve the newly created bug ID.")
+                return response
+
             logger.info(f"Bug entry created successfully: {bug_id}")
-            if bug_id:
+
+
+            product_id = bug_info.product_id
+            select_product_query = select(products_table.c.count, products_table.c.product_short_code).where(
+                products_table.c.product_id == product_id
+            )
+            product_data = connection.execute(select_product_query).fetchone()
+
+            if product_data:
+                current_count = product_data[0]
+                product_short_code = product_data[1]
+
+                new_count = current_count + 1
+
+
+                update_product_query = update(products_table).where(
+                    products_table.c.product_id == product_id
+                ).values(count=new_count)
+                connection.execute(update_product_query)
+                bug_code = f"{product_short_code}{new_count}"
+                update_bug_query = update(bugs_table).where(
+                    bugs_table.c.bug_id == bug_id
+                ).values(bug_code=bug_code)
+                connection.execute(update_bug_query)
+
+                logger.info(f"Updated bug_code for bug_id {bug_id} to {bug_code}")
+
+                # Step 5: Prepare the successful response
                 response = AddBugResponse(
                     status=Status(status=True, error=None, message="Bug Created Successfully"),
                     bug_id=bug_id
                 )
+            else:
+                logger.warning(f"No product found with product_id {product_id}. Cannot update bug_code.")
+
     except SQLAlchemyError as e:
         logger.error(f"Error creating bug entry: {e}")
-        response = AddBugResponse(status=Status(status=False, error="500", message="Enter Proper Bug Info"), bug_id=-1)
+        response = AddBugResponse(
+            status=Status(status=False, error="500", message="Enter Proper Bug Info"),
+            bug_id=-1
+        )
     finally:
         return response
+
 
 
 def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
@@ -64,7 +104,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     bug_history = Table(Tables.BUG_HISTORY, metadata, autoload_with=engine)
     reviewer = True
 
-    # Select the current bug details
+
     qu = select(
         bugs_table.c.product_id,
         bugs_table.c.title,
