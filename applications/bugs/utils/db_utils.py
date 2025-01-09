@@ -38,7 +38,7 @@ def add_bug(engine: Engine, bug_info: AddBugRq):
 
             current_count = product_data[0]
             product_short_code = product_data[1]
-            bug_code = f"{product_short_code}{current_count + 1}"
+            bug_code = f"{product_short_code}-{current_count + 1}"
 
             insert_into_bugs_query = bugs_table.insert().values(
                 product_id=bug_info.product_id,

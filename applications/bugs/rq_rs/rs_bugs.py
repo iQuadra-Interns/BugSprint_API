@@ -31,7 +31,7 @@ class BugDetails(BaseModel):
     status: int | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
-
+    bug_code:str | None = None
 
 class ViewBugDetails(BaseModel):
     bug_id: int
@@ -52,6 +52,7 @@ class ViewBugDetails(BaseModel):
     status: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    bug_code: str | None = None
 
 
 class FindBugResponse(BaseModel):
