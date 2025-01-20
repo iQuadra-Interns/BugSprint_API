@@ -1,14 +1,13 @@
 import logging
 from cgitb import text
-
-from sqlalchemy import Table, select
-from sqlalchemy.dialects.mssql.information_schema import views
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
-from config.database import DatabaseDetails, Tables
+from config.database import DatabaseDetails, Tables,Views
 from common.classes.generic import Status
 from typing import Optional
 from applications.common_constants.rq_rs.rs_all import GetTableDataResponse
+from typing import List, Dict
+from sqlalchemy import Table, MetaData, select
 from applications.common_constants.rq_rs.rs_all import GetUserDetailsResponse, UserDetailsResponse
 
 logger = logging.getLogger(__name__)
@@ -107,13 +106,18 @@ def get_table_data(engine: Engine, table_name: Optional[str] = None):
             status=Status(status=False, error="500", message="Database error occurred")
         )
 
-def fetch_user_details(engine: Engine) -> GetUserDetailsResponse:
-    resp = GetUserDetailsResponse(status=Status())
-    with engine.begin() as connection:
-        user_details_table = Table(Tables.USER_DETAILS, DatabaseDetails.METADATA, autoload_with=engine)
-        query = select([user_details_table.c.user_id, user_details_table.c.user_name])
-        results = connection.execute(query).fetchall()
-        resp.users = [UserDetailsResponse(user_id=row["user_id"], user_name=row["user_name"]) for row in results]
-        resp.status.status = True
-        resp.status.message = "User details fetched successfully."
-        return resp
+
+def get_user_details(engine) -> List[Dict]:
+    metadata = MetaData()
+    user_details_view = Table(
+        Views.USER_DETAILS,
+        metadata,
+        autoload_with=engine
+    )
+
+    query = select(user_details_view.c.user_id, user_details_view.c.user_name)
+
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        return [{"user_id": row.user_id, "user_name": row.user_name} for row in result]
+
