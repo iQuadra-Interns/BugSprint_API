@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from applications.common_constants.routes.all_route import router as common_constants_router
+from applications.common_constants.routes.all_route import router as fetch_user_details
 from applications.common_constants.routes.forgot_password_router import forgot_password_router
 from applications.common_constants.routes.reset_password_router import reset_password_router
 from applications.common_constants.routes.edit_profile_router import edit_profile_router
@@ -18,6 +19,8 @@ def add_routes(app: FastAPI):
     app.include_router(forgot_password_router)
     app.include_router(reset_password_router)
     app.include_router(edit_profile_router)
+    app.include_router(fetch_user_details)
+
 
 def configure_application() -> FastAPI:
     app = FastAPI()
