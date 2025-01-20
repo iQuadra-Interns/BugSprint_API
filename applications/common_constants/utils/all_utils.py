@@ -115,7 +115,8 @@ def get_user_details(engine) -> List[Dict]:
         autoload_with=engine
     )
 
-    query = select(user_details_view.c.user_id, user_details_view.c.user_name)
+    query = (select(user_details_view.c.user_id, user_details_view.c.user_name).
+             where(user_details_view.c.user_type.in_(["ADM", "DEV"])))
 
     with engine.connect() as connection:
         result = connection.execute(query)
