@@ -17,8 +17,7 @@ def edit_profile_endpoint(
         profile_data: EditProfileRequest
 ) -> EditProfileResponse:
     logger.info(f"Received request to edit profile for user_id: {user_id}")
-
     engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     resp = edit_user_profile(engine, user_id, profile_data)
-
+    engine.dispose()
     return resp

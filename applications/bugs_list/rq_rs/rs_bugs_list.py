@@ -1,35 +1,35 @@
-from typing import List, Union
+from typing import  Union
 from pydantic import BaseModel
 from datetime import datetime
 
 
 class Status(BaseModel):
     sts: bool = False
-    err: Union[str, None] = "Operation failed"
-    war: Union[str, None] = None
-    msg: Union[str, None] = None
+    err: str | None = "Operation failed"
+    war: str | None = None
+    msg: str | None = None
 
 
 
 class Bug(BaseModel):
-    bug_id: Union[int, None] = None
-    title:Union[str,None]=None
-    product: Union[str, None] = None
-    environment: Union[str, None] = None
-    scenario: Union[str, None] = None
-    testing_medium: Union[str, None] = None
-    description: Union[str, None] = None
-    user_data: Union[str, None] = None
-    priority: Union[str, None] = None
-    reported_by: Union[str, None] = None
-    reported_at: Union[datetime, None] = None
-    assignee: Union[str, None] = None
-    root_cause_location: Union[str, None] = None
-    root_cause: Union[str, None] = None
-    resolution: Union[str, None] = None
-    status: Union[str, None] = None
-    created_at: Union[datetime, None] = None
-    updated_at: Union[datetime, None] = None
+    bug_id: int | None = None
+    title: str | None = None
+    product: str | None = None
+    environment: str | None = None
+    scenario: str | None = None
+    testing_medium: str | None = None
+    description: str | None = None
+    user_data: str | None = None
+    priority: str | None = None
+    reported_by: str | None = None
+    reported_at: datetime | None = None
+    assignee: str | None = None
+    root_cause_location: str | None = None
+    root_cause: str | None = None
+    resolution: str | None = None
+    status: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class BugsListResponse(BaseModel):

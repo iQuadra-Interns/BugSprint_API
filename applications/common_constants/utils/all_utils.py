@@ -1,5 +1,4 @@
 import logging
-from cgitb import text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from config.database import DatabaseDetails, Tables,Views
@@ -8,7 +7,6 @@ from typing import Optional
 from applications.common_constants.rq_rs.rs_all import GetTableDataResponse
 from typing import List, Dict
 from sqlalchemy import Table, MetaData, select
-from applications.common_constants.rq_rs.rs_all import GetUserDetailsResponse, UserDetailsResponse
 
 logger = logging.getLogger(__name__)
 

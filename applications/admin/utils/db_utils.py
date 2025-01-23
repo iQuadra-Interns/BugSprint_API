@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import MetaData, Table, insert
+from sqlalchemy import Table
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 

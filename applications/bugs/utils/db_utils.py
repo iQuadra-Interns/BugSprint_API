@@ -1,10 +1,7 @@
 import json
 import logging
-
 import pandas as pd
-from fastapi import HTTPException,status
-from openpyxl.styles.builtins import warning
-from sqlalchemy import MetaData, Table, insert, update, select, create_engine, and_, or_
+from sqlalchemy import MetaData, Table, update, select, and_
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from applications.bugs.rq_rs.rq_bugs import AddBugRq , UpdateBugRq

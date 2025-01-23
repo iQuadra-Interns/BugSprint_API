@@ -1,13 +1,12 @@
 import pandas as pd
-from fastapi import HTTPException, status
-from sqlalchemy import Engine, MetaData, Table
+from fastapi import status
+from sqlalchemy import Engine, Table
 from sqlalchemy import select, and_
 import logging
-from config.database import DatabaseDetails, Tables, Views
+from config.database import DatabaseDetails, Views
 from applications.signin.rq_rs.rq_signin import SignInRq
 from applications.signin.rq_rs.rs_signin import PersonalDetails,SignInRs
 from common.classes.generic import Status, UserId
-from passlib.context import CryptContext
 import bcrypt
 
 logging.basicConfig(level=logging.DEBUG)

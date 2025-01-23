@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from sqlalchemy import create_engine
 
 from applications.bugs_list.utils.utils_bugs_list import fetch_bugs_list
@@ -15,4 +15,5 @@ router = APIRouter()
 def get_bugs_list():
     engine=create_engine(DatabaseDetails.CONNECTION_STRING)
     resp=fetch_bugs_list(engine)
+    engine.dispose()
     return resp
