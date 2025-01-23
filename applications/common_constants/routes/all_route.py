@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.post("/fetch-table-data", response_model=GetTableDataResponse)
-def get_table_data(request: TableRequest) -> GetTableDataResponse:
+def fetch_table_data(request: TableRequest) -> GetTableDataResponse:
     engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     table_name = request.table_name.strip() if request.table_name and request.table_name != "string" else None
     return get_table_data(engine, table_name)
