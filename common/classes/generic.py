@@ -2,10 +2,9 @@
 Authors: Generic/Common classes for various requests and responses
 JIRA Tkt: NA
 """
-import datetime
-from typing import Union, List, Optional
+from typing import Union
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel
 
 
 class Status(BaseModel):

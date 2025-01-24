@@ -1,12 +1,10 @@
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from sqlalchemy import create_engine
-#from sqlalchemy.exc import SQLAlchemyError
 from config.database import DatabaseDetails
 from applications.bugs.rq_rs.rq_bugs import AddBugRq, UpdateBugRq
 from applications.bugs.rq_rs.rs_bugs import AddBugResponse, UpdateBugResponse, FindBugResponse, BugDetails
 from applications.bugs.utils.db_utils import add_bug, update_bug, find_bug
-from common.classes.generic import Status
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +21,7 @@ def add_bug_endpoint(bug_info: AddBugRq) -> AddBugResponse:
     return resp
 
 
-@bug_router.post("/api/update-bug/{bug_id}",
+@bug_router.post("/api/update-bug",
                  response_model=UpdateBugResponse,
                  response_model_exclude_unset=True)
 def update_bug_endpoint(bug_id: int, bug_info: UpdateBugRq) -> UpdateBugResponse:
@@ -33,7 +31,7 @@ def update_bug_endpoint(bug_id: int, bug_info: UpdateBugRq) -> UpdateBugResponse
     return resp
 
 
-@bug_router.get("/api/find-bug/{bug_id}",
+@bug_router.get("/api/find-bug",
                 response_model=FindBugResponse,
                 response_model_exclude_unset=True)
 def find_bug_endpoint(bug_id: int) -> FindBugResponse:

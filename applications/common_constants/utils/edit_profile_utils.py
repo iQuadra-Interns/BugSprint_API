@@ -1,7 +1,6 @@
-from sqlalchemy import Table, select, update, MetaData
+from sqlalchemy import Table, select, update
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi import APIRouter, HTTPException
 from config.database import DatabaseDetails, Views
 from applications.common_constants.rq_rs.edit_profile_rs import EditProfileResponse
 from common.classes.generic import Status

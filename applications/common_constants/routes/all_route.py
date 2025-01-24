@@ -1,6 +1,4 @@
 import logging
-from typing import List
-
 from fastapi import APIRouter
 from sqlalchemy import create_engine
 from config.database import DatabaseDetails
@@ -15,11 +13,14 @@ router = APIRouter()
 def fetch_table_data(request: TableRequest) -> GetTableDataResponse:
     engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     table_name = request.table_name.strip() if request.table_name and request.table_name != "string" else None
-    return get_table_data(engine, table_name)
+    resp = get_table_data(engine, table_name)
+    engine.dispose()
+    return resp
 
 @router.get("/get-user-details", response_model=GetUserDetailsResponse)
 def get_user_details_endpoint() -> GetUserDetailsResponse:
     logger.info("Received request to fetch user details")
     engine = create_engine(DatabaseDetails.CONNECTION_STRING)
     user_details = get_user_details(engine)
+    engine.dispose()
     return GetUserDetailsResponse(users=user_details)

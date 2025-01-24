@@ -1,7 +1,6 @@
-import json
 import logging
 import pandas as pd
-from sqlalchemy import MetaData, Table, select, create_engine, outerjoin
+from sqlalchemy import MetaData, Table, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from config.database import Tables, DatabaseDetails, Views
