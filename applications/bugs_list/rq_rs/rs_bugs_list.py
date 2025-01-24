@@ -19,6 +19,7 @@ class Bug(BaseModel):
     scenario: str | None = None
     testing_medium: str | None = None
     description: str | None = None
+    bug_code : str | None = None
     user_data: str | None = None
     priority: str | None = None
     reported_by: str | None = None

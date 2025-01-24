@@ -42,6 +42,7 @@ class ViewBugDetails(BaseModel):
     testing_medium: str
     description: str
     user_data: str | None = None
+    bug_code : str
     priority: str
     reported_by: str
     reported_at: datetime | None = None

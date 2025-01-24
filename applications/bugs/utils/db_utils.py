@@ -214,6 +214,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
            bugs_table.c.assignee_id,
            root_cause_location_table.c.location_name,
            bugs_table.c.root_cause,
+           bugs_table.c.bug_code,
            bugs_table.c.resolution,
            bugs_status_table.c.status_name,
            bugs_table.c.created_at,
@@ -250,6 +251,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
             description=result[0]['description'],
             user_data=result[0]['user_data'],
             priority=result[0]['priority_name'],
+            bug_code=result[0]['bug_code'],
             reported_by=result[0]['reported_user_name'],
             reported_at=result[0]['reported_at'],
             assignee=result[0]['assignee_user_name'],  # This will be replaced later
