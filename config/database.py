@@ -36,6 +36,7 @@ class Tables:
     USER_TYPES = "user_types"
     USERS = "users"
     FORGOT_PASSWORD_OTP_STAGING = "forgot_password_otp_staging"
+    TEST_CASES="test_cases"
 
 
 class Views:
