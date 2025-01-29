@@ -1,12 +1,10 @@
-import logging
 import sys
 
 sys.path.append("/mnt/python/lib")
 
-import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum
+
 
 from applications.test_cases.routes.test_cases_routes import router as test_cases_router
 
@@ -28,7 +26,7 @@ def configure_application() -> FastAPI:
 
 test_cases_router = configure_application()
 
-@test_cases_router.get("/")
+@test_cases_router.get("/test-cases")
 def _():
     resp = {
         'sts': True,
