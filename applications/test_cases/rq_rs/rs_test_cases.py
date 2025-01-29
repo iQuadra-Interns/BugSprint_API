@@ -1,11 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from common.classes.generic import Status
 
-class Status(BaseModel):
-    sts: bool = False
-    err: Optional[str] = "Operation failed"
-    war: Optional[str] = None
-    msg: Optional[str] = None
 
 
 class TestCase(BaseModel):
@@ -14,11 +10,36 @@ class TestCase(BaseModel):
     test_scenario: str
     test_steps: str
     actual_result: str
+    expected_result: str
     comment: str
     developer_comment: str
-
 
 
 class TestCasesResponse(BaseModel):
     status: Status
     test_cases: Optional[List[TestCase]] = None
+
+
+class UpdateTestCaseResponse(BaseModel):
+    status: Status
+
+
+class DeleteTestCaseResponse(BaseModel):
+    status: Status
+
+
+
+class TestCase(BaseModel):
+    testcase_id: int
+    product_id: int
+    testcase_code: str
+    test_scenario: str
+    test_steps: str
+    actual_result: str
+    expected_result: str
+    comment: str
+    developer_comment: str
+
+class GetTestCasesResponse(BaseModel):
+    status: Status
+    test_cases: List[TestCase]

@@ -10,6 +10,7 @@ from mangum import Mangum
 
 from applications.test_cases.routes.test_cases_routes import router as test_cases_router
 
+
 def add_routes(app: FastAPI):
     app.include_router(test_cases_router)
 
