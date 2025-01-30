@@ -1,5 +1,7 @@
 import sys
 
+from applications.test_cases.test_cases import test_cases_router
+
 sys.path.append("/mnt/efs/BugSprint_312/lib/python3.12/site-packages")
 
 import os
@@ -37,7 +39,8 @@ def add_applications():
         Mount("/all_common_constants", common_constants_router),
         Mount("/admin", admin),
         Mount("/signin", signin),
-        Mount("/bugs", bugs)
+        Mount("/bugs", bugs),
+        Mount("/test_cases",test_cases_router)
     ]
 
 
