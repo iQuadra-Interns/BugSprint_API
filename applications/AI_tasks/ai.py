@@ -1,7 +1,5 @@
-import logging
 import sys
-
-sys.path.append("/mnt/python/lib")
+sys.path.append("/mnt/efs/BugSprint_312/lib/python3.12/site-packages")
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from applications.AI_tasks.routes.routes import router
