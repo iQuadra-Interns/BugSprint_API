@@ -20,7 +20,7 @@ from applications.bugs.bugs import bugs
 
 from applications.bugs_list.bugs_list import bugs_list_router
 from applications.common_constants.common_constants import common_constants_router
-from applications.AI_tasks.ai import rephrase_api_router
+from applications.ai_tasks.ai import rephrase_router
 # Configure logging
 logging.basicConfig(
     filename="mainapp.log",
@@ -32,14 +32,13 @@ logger = logging.getLogger('bug-sprint-logger')
 
 def add_applications():
     return [
-        # Mount applications here
         Mount("/bugs_list", bugs_list_router),
         Mount("/all_common_constants", common_constants_router),
         Mount("/admin", admin),
         Mount("/signin", signin),
         Mount("/bugs", bugs),
         Mount("/test_cases",test_cases_router),
-        Mount("/ai_tasks", rephrase_api_router)
+        Mount("/ai_tasks", rephrase_router)
     ]
 
 

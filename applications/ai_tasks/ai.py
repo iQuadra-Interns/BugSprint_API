@@ -2,10 +2,10 @@ import sys
 sys.path.append("/mnt/efs/BugSprint_312/lib/python3.12/site-packages")
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from applications.AI_tasks.routes.routes import router
+from applications.ai_tasks.routes.routes import rephrase_description
 
 def add_routes(app: FastAPI):
-    app.include_router(router)
+    app.include_router(rephrase_description)
 
 def configure_application() -> FastAPI:
     app = FastAPI()
@@ -19,9 +19,9 @@ def configure_application() -> FastAPI:
     add_routes(app)
     return app
 
-rephrase_api_router = configure_application()
+rephrase_router = configure_application()
 
-@rephrase_api_router.get("/")
+@rephrase_router.get("/")
 def _():
     resp = {
         'sts': True,
