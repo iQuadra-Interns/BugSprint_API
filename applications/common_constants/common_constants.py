@@ -1,7 +1,7 @@
 import logging
 import sys
 
-sys.path.append("/mnt/python/lib")
+sys.path.append("/mnt/efs/BugSprint_312/lib/python3.12/site-packages")
 
 import uvicorn
 from fastapi import FastAPI
