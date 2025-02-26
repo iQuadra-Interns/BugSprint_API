@@ -63,8 +63,8 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
 
         logger.debug(f"Query Result: {result}")
         if not result:
-            logger.warning("No active bugs found.")
-            status = Status(sts=False, err="404", msg="No active bugs found")
+            logger.warning("Bug doesn't exist/deleted.")
+            status = Status(sts=False, err="404", msg="Bug doesn't exist/deleted.")
             return BugsListResponse(status=status)
 
         lst = []
@@ -92,7 +92,7 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
             )
             lst.append(bug_detail)
 
-        status = Status(sts=True, err=None, msg="Active bugs fetched successfully")
+        status = Status(sts=True, err=None, msg=" bugs fetched successfully")
         return BugsListResponse(status=status, bugs=lst)
 
     except SQLAlchemyError as e:

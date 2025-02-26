@@ -129,7 +129,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
             old_values_list = pd.read_sql(qu, connection).to_dict('records')  # Extract the first record
             if not old_values_list:
                 logger.warning("No bug entry found with the given ID")
-                status = Status(status=False, error="404", message="Enter bug_id doesn't exist")
+                status = Status(status=False, error="404", message="Enter bug_id doesn't exist/deleted")
                 return UpdateBugResponse(status=status)
 
             old_values = old_values_list[0]
@@ -137,9 +137,10 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
 
         if result.rowcount == 0:
             logger.warning("No bug entry found with the given ID")
-            status = Status(status=False, error="404", message="Enter bug_id doesn't exist ")
+            status = Status(status=False, error="404", message="Enter bug_id doesn't exist/deleted ")
             return UpdateBugResponse(status=status)
 
+        # Compare old and new values and build changes dict
 
         changes = {}
         new_values = dict(bug_info)
@@ -147,7 +148,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
         for field, old_value in old_values.items():
             new_value = new_values.get(field)
             if new_value != old_value:
-                changes[field] = [old_value, new_value]
+                changes[field] = [old_value, new_value] #store only changed values
 
         if changes:
             changes_json = json.dumps(changes)
