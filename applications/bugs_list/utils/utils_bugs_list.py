@@ -1,6 +1,6 @@
 import logging
 import pandas as pd
-from sqlalchemy import MetaData, Table, select
+from sqlalchemy import MetaData, Table, select, or_
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from config.database import Tables, DatabaseDetails, Views
@@ -52,20 +52,19 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
                                        ).outerjoin(user_details_table, bugs_table.c.reported_by == user_details_table.c.user_id
                                               ).outerjoin(user_details_table_copy, bugs_table.c.assignee_id == user_details_table_copy.c.user_id
                                                      ).outerjoin(root_cause_location_table, bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
-                                                            ).outerjoin(bugs_status_table, bugs_table.c.status == bugs_status_table.c.status_id)
+                                                            ).outerjoin(bugs_status_table, bugs_table.c.status == bugs_status_table.c.status_id
+                                                            ).where(or_(bugs_table.c.archive == 0, bugs_table.c.archive.is_(None)))
+
 
     try:
         with engine.begin() as connection:
             result = pd.read_sql(select_bug_query, connection).to_dict('records')
 
 
-        # Log the result for debugging
         logger.debug(f"Query Result: {result}")
-
-        # If result is empty
         if not result:
-            logger.warning("No bugs found.")
-            status = Status(sts=False, err="404", msg="No bugs found")
+            logger.warning("No active bugs found.")
+            status = Status(sts=False, err="404", msg="No active bugs found")
             return BugsListResponse(status=status)
 
         lst = []
@@ -93,7 +92,7 @@ def fetch_bugs_list(engine: Engine) -> BugsListResponse:
             )
             lst.append(bug_detail)
 
-        status = Status(sts=True, err=None, msg="Bugs fetched successfully")
+        status = Status(sts=True, err=None, msg="Active bugs fetched successfully")
         return BugsListResponse(status=status, bugs=lst)
 
     except SQLAlchemyError as e:
