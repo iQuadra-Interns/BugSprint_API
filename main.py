@@ -11,16 +11,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 import logging
 
-
-
 from applications.admin.admin import admin
-
 from applications.signin.signin import signin
 from applications.bugs.bugs import bugs
-
 from applications.bugs_list.bugs_list import bugs_list_router
 from applications.common_constants.common_constants import common_constants_router
-from applications.ai_tasks.ai import rephrase_router
+from applications.ai_tasks.ai import ai_tasks_handler
+
 # Configure logging
 logging.basicConfig(
     filename="mainapp.log",
@@ -37,8 +34,8 @@ def add_applications():
         Mount("/admin", admin),
         Mount("/signin", signin),
         Mount("/bugs", bugs),
-        Mount("/test_cases",test_cases_router),
-        Mount("/ai_tasks", rephrase_router)
+        Mount("/test_cases", test_cases_router),
+        Mount("/ai_tasks", ai_tasks_handler)
     ]
 
 
@@ -65,6 +62,7 @@ signin_handler = Mangum(signin)
 bugs_handler = Mangum(bugs)
 bug_search_handler = Mangum(bugs_list_router)
 common_constants_handler = Mangum(common_constants_router)
+ai_tasks_handler = Mangum(ai_tasks_handler)
 
 
 @application.get("/")
