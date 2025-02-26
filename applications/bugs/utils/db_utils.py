@@ -6,11 +6,10 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from applications.bugs.rq_rs.rq_bugs import AddBugRq , UpdateBugRq
 from common.classes.generic import Status
-from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse, BugDetails,ViewBugDetails
+from applications.bugs.rq_rs.rs_bugs import AddBugResponse,UpdateBugResponse, FindBugResponse, BugDetails,ViewBugDetails,DeleteBugResponse
 from config.database import Tables, DatabaseDetails, Views
 
 logger = logging.getLogger(__name__)
-
 
 def add_bug(engine: Engine, bug_info: AddBugRq):
     logger.info("Creating a new bug entry")
@@ -108,7 +107,7 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
     ).where(bugs_table.c.bug_id == bug_id)
 
     # Build update query
-    update_bug_query = update(bugs_table).where(bugs_table.c.bug_id == bug_id).values(
+    update_bug_query = update(bugs_table).where(and_(bugs_table.c.bug_id == bug_id, bugs_table.c.archive == 0)).values(
         product_id=bug_info.product_id,
         title=bug_info.title,
         environment_id=bug_info.environment_id,
@@ -127,30 +126,29 @@ def update_bug(engine: Engine, bug_id: int, bug_info: UpdateBugRq):
 
     try:
         with engine.begin() as connection:
-            # Fetch current bug data
             old_values_list = pd.read_sql(qu, connection).to_dict('records')  # Extract the first record
             if not old_values_list:
                 logger.warning("No bug entry found with the given ID")
-                status = Status(status=False, error="404", message="Enter proper bug_id")
+                status = Status(status=False, error="404", message="Enter bug_id doesn't exist/deleted")
                 return UpdateBugResponse(status=status)
 
             old_values = old_values_list[0]
-            # Execute the update query
             result = connection.execute(update_bug_query)
 
         if result.rowcount == 0:
             logger.warning("No bug entry found with the given ID")
-            status = Status(status=False, error="404", message="Enter proper bug_id")
+            status = Status(status=False, error="404", message="Enter bug_id doesn't exist/deleted ")
             return UpdateBugResponse(status=status)
 
         # Compare old and new values and build changes dict
+
         changes = {}
         new_values = dict(bug_info)
 
         for field, old_value in old_values.items():
             new_value = new_values.get(field)
             if new_value != old_value:
-                changes[field] = [old_value, new_value]  # Store only changed values
+                changes[field] = [old_value, new_value] #store only changed values
 
         if changes:
             changes_json = json.dumps(changes)
@@ -228,7 +226,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
                                                        ).join(user_details_table_copy, bugs_table.c.assignee_id == user_details_table_copy.c.user_id
                                                             ).join(root_cause_location_table,bugs_table.c.root_cause_location == root_cause_location_table.c.location_id
                                                                    ).join(bugs_status_table,bugs_table.c.status == bugs_status_table.c.status_id
-                                                                         ).where(and_(bugs_table.c.bug_id == bug_id))
+                                                                         ).where(and_(bugs_table.c.bug_id == bug_id, bugs_table.c.archive == 0))
 
     try:
         with engine.begin() as connection:
@@ -237,7 +235,7 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
         # # Check if the result is empty
         if len(result) == 0:
             logger.warning("No bug entry found with the given ID %s", bug_id)
-            status = Status(status=False, error="404", message="Bug not found")
+            status = Status(status=False, error="404", message="Bug doesn't exist or deleted ")
             return FindBugResponse(status=status)
 
         bug_details = ViewBugDetails(
@@ -270,3 +268,32 @@ def find_bug(engine: Engine, bug_id: int) -> FindBugResponse:
         logger.error(f"Error finding bug entry: {e}")
         status = Status(status=False, error="fetching data failed", message="Operation Failed")
         return FindBugResponse(status=status)
+
+
+def delete_bug(engine: Engine, bug_id: int) -> DeleteBugResponse:
+    logger.info("Deleting bug entry with ID %s", bug_id)
+    metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
+    bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
+
+    try:
+        with engine.begin() as connection:
+            select_query = select(bugs_table.c.archive).where(bugs_table.c.bug_id == bug_id)
+            result = connection.execute(select_query).fetchone()
+
+            if not result:
+                logger.warning(f"Bug ID {bug_id} not found.")
+                return DeleteBugResponse(status=Status(status=False, error="404", message="Bug not found"))
+
+            if result[0] == 1:
+                logger.warning(f"Bug ID {bug_id} is already deleted.")
+                return DeleteBugResponse(status=Status(status=False, error="410", message="Bug already deleted"))
+
+            update_query = update(bugs_table).where(bugs_table.c.bug_id == bug_id).values(archive=1)
+            connection.execute(update_query)
+
+        logger.info(f"Bug ID {bug_id} deleted successfully.")
+        return DeleteBugResponse(status=Status(status=True, error=None, message="Bug archived successfully"))
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error deleting bug: {e}")
+        return DeleteBugResponse(status=Status(status=False, error="500", message="Database error"))

@@ -59,3 +59,6 @@ class ViewBugDetails(BaseModel):
 class FindBugResponse(BaseModel):
     status: Status
     bug_details: ViewBugDetails | None = None
+
+class DeleteBugResponse(BaseModel):
+    status: Status
