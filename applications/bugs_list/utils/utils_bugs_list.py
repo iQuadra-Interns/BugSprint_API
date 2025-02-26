@@ -6,13 +6,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from config.database import Tables, DatabaseDetails, Views
 from applications.bugs_list.rq_rs.rs_bugs_list import Status, BugsListResponse, Bug
 
-# Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
 def fetch_bugs_list(engine: Engine) -> BugsListResponse:
-    # Define metadata and tables
     metadata = MetaData(schema=DatabaseDetails.DEFAULT_SCHEMA)
     bugs_table = Table(Tables.BUGS, metadata, autoload_with=engine)
     products_table = Table(Tables.PRODUCTS, metadata, autoload_with=engine)

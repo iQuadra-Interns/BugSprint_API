@@ -33,3 +33,6 @@ class UpdateBugRq(BaseModel):
     root_cause: str
     resolution: str
     status: int
+
+class DeleteBugRq(BaseModel):
+    bug_id: int
