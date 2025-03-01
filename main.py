@@ -37,7 +37,7 @@ def add_applications():
         Mount("/signin", signin),
         Mount("/bugs", bugs),
         Mount("/test_cases",test_cases_router),
-        Mount("/ai_tasks", ai_tasks_router)
+        Mount("/ai_tasks", ai_tasks_router),
         Mount("/test_cases", test_cases_router)
     ]
 
