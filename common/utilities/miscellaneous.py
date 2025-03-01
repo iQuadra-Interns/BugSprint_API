@@ -9,8 +9,8 @@ import string
 logger = logging.getLogger()
 
 
-def str_2_dict(string: str) -> dict:
-    d = json.loads(string)
+def str_2_dict(given_string: str) -> dict:
+    d = json.loads(given_string)
     return d
 
 
@@ -47,5 +47,5 @@ def generate_random_password(length: int = 8) -> str:
     return password
 
 
-def generate_otp(size=6):
-    return random.randint(10 ** (size - 1), int("9" * size))
+def generate_otp(length=6):
+    return random.randint(10 ** (length - 1), int("9" * length))

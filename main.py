@@ -1,7 +1,4 @@
 import sys
-
-from applications.test_cases.test_cases import test_cases_router
-
 sys.path.append("/mnt/efs/BugSprint_312/lib/python3.12/site-packages")
 
 import uvicorn
@@ -17,10 +14,12 @@ from applications.admin.admin import admin
 
 from applications.signin.signin import signin
 from applications.bugs.bugs import bugs
-
 from applications.bugs_list.bugs_list import bugs_list_router
 from applications.common_constants.common_constants import common_constants_router
-from applications.ai_tasks.ai import rephrase_router
+from applications.ai_tasks.ai import ai_tasks_router
+from applications.test_cases.test_cases import test_cases_router
+
+
 # Configure logging
 logging.basicConfig(
     filename="mainapp.log",
@@ -38,7 +37,8 @@ def add_applications():
         Mount("/signin", signin),
         Mount("/bugs", bugs),
         Mount("/test_cases",test_cases_router),
-        Mount("/ai_tasks", rephrase_router)
+        Mount("/ai_tasks", ai_tasks_router)
+        Mount("/test_cases", test_cases_router)
     ]
 
 
@@ -65,7 +65,8 @@ signin_handler = Mangum(signin)
 bugs_handler = Mangum(bugs)
 bug_search_handler = Mangum(bugs_list_router)
 common_constants_handler = Mangum(common_constants_router)
-
+test_cases_handler = Mangum(test_cases_router)
+ai_tasks_handler = Mangum(ai_tasks_router)
 
 @application.get("/")
 def main_app():

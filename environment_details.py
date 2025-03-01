@@ -9,6 +9,8 @@ class EnvironmentDetails:
             "dev-BugSprint-bug_search",
             "dev-BugSprint-common",
             "dev-BugSprint-signin",
+            "dev-BugSprint-test_cases",
+            "dev-BugSprint-ai-tasks",
         ],
     }
     LAMBDA_FUNCTIONS = LAMBDA_FUNCTION_DETAILS[AWS_ACCOUNT_PROFILE]
