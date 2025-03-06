@@ -54,25 +54,25 @@ def call_open_ai_api(model: str, messages: list, temperature: float, n: int, fre
 
 
 def rephrase_text(description: str) -> RephraseResponse:
-    try:
-        messages = [
-            {"role": "system", "content": "You are an AI that rephrases text while preserving meaning."},
-            {"role": "user", "content": f"Rephrase this: {description}"}
-        ]
+    messages = [
+        {"role": "system", "content": "You are an AI that rephrases text while preserving meaning."},
+        {"role": "user", "content": f"Rephrase this: {description}"}
+    ]
 
-        response = call_open_ai_api(
+    try:
+        rephrased_text = call_open_ai_api(
             model="gpt-3.5-turbo",
             messages=messages,
             temperature=0.1,
             n=1,
             frequency_penalty=0,
-            user="VHemanthC",
-            validation_model=RephraseResponse
+            user="VHemanthC"
         )
-
-        return response if response else RephraseResponse(original=description,
-                                                          rephrased="Rephrasing failed. Try again later.")
+        if not isinstance(rephrased_text, str):  # Ensure the response is a string
+            raise ValueError("Unexpected response type from OpenAI API")
     except Exception as e:
-        logger.error(f"Error in OpenAI API call: {e}")
-        return RephraseResponse(original=description, rephrased="Rephrasing failed. Try again later.")
+        print(f"Rephrase API failed: {e}")  # Log the error
+        rephrased_text = "Rephrase failed"  # Fallback response
+
+    return RephraseResponse(original=description, rephrased=rephrased_text)
 
