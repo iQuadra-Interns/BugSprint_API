@@ -6,7 +6,6 @@ import logging
 
 from openai import OpenAI
 from pydantic import BaseModel
-
 from config.config import Config
 
 logger = logging.getLogger(__name__)
@@ -15,8 +14,8 @@ if not openai.api_key:
     logger.error("OpenAI API key is missing. Ensure OPENAI_API_KEY is set in environment variables.")
 
 
-def call_open_ai_api(model: str, messages: list, temperature: float, n: int, frequency_penalty: int,
-                     user: str, validation_model: Type[BaseModel] = None) -> Type[BaseModel]:
+def call_open_ai_api(model: str = "gpt-3.5-turbo",messages: list = None,temperature: float = 0.1,n: int = 1,frequency_penalty: float = 0,user: str = "VHemanthC",validation_model: Type[BaseModel] = None) -> Type[BaseModel]:
+
     client = OpenAI(
         api_key=Config.OPENAI_API_KEY
     )
@@ -52,17 +51,16 @@ def call_open_ai_api(model: str, messages: list, temperature: float, n: int, fre
             max_retries -= 1
     return response
 
-
 def rephrase_text(description: str) -> str:
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = call_open_ai_api(
             messages=[
                 {"role": "system", "content": "You are an AI that rephrases text while preserving meaning."},
                 {"role": "user", "content": f"Rephrase this: {description}"}
             ]
         )
-        return response["choices"][0]["message"]["content"].strip()
+        return response.strip()
     except Exception as e:
         logger.error(f"Error in OpenAI API call: {e}")
         return "Rephrasing failed. Try again later."
+
