@@ -6,7 +6,7 @@ import logging
 
 from openai import OpenAI
 from pydantic import BaseModel
-
+from applications.ai_tasks.rq_rs.ai_rs import RephraseResponse
 from config.config import Config
 
 logger = logging.getLogger(__name__)
@@ -53,16 +53,26 @@ def call_open_ai_api(model: str, messages: list, temperature: float, n: int, fre
     return response
 
 
-def rephrase_text(description: str) -> str:
+def rephrase_text(description: str) -> RephraseResponse:
     try:
-        response = openai.ChatCompletion.create(
+        messages = [
+            {"role": "system", "content": "You are an AI that rephrases text while preserving meaning."},
+            {"role": "user", "content": f"Rephrase this: {description}"}
+        ]
+
+        response = call_open_ai_api(
             model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are an AI that rephrases text while preserving meaning."},
-                {"role": "user", "content": f"Rephrase this: {description}"}
-            ]
+            messages=messages,
+            temperature=0.1,
+            n=1,
+            frequency_penalty=0,
+            user="VHemanthC",
+            validation_model=RephraseResponse
         )
-        return response["choices"][0]["message"]["content"].strip()
+
+        return response if response else RephraseResponse(original=description,
+                                                          rephrased="Rephrasing failed. Try again later.")
     except Exception as e:
         logger.error(f"Error in OpenAI API call: {e}")
-        return "Rephrasing failed. Try again later."
+        return RephraseResponse(original=description, rephrased="Rephrasing failed. Try again later.")
+
