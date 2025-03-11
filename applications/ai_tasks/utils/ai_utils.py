@@ -11,22 +11,24 @@ from config.config import Config
 
 logger = logging.getLogger(__name__)
 openai.api_key = Config.OPENAI_API_KEY
+
 if not openai.api_key:
     logger.error("OpenAI API key is missing. Ensure OPENAI_API_KEY is set in environment variables.")
 
 
-def call_open_ai_api(model: str, messages: list, temperature: float, n: int, frequency_penalty: int,
-                     user: str, validation_model: Type[BaseModel] = None) -> Type[BaseModel]:
-    client = OpenAI(
-        api_key=Config.OPENAI_API_KEY
-    )
-    openai.api_key = Config.OPENAI_API_KEY
+def call_open_ai_api(
+    model: str, messages: list, temperature: float, n: int, frequency_penalty: int,
+    user: str, validation_model: Type[BaseModel] = None
+) -> str | Type[BaseModel]:
+    client = OpenAI(api_key=Config.OPENAI_API_KEY)
+
     if validation_model:
-        response_format = json.dumps({k: v['type'] for k, v in validation_model.schema()['properties'].items()})
-        messages[0]["content"] += f"Give output Strictly in this JSON Format with no new-line characters: {response_format}"
+        response_format = json.dumps({k: v['type'] for k, v in validation_model.model_json_schema()['properties'].items()})
+        messages[0]["content"] += f" Strictly output in JSON: {response_format}"
+
     max_retries = 3
-    response = None
-    while max_retries > 0:
+
+    for attempt in range(max_retries):
         try:
             response = client.chat.completions.create(
                 model=model,
@@ -36,21 +38,16 @@ def call_open_ai_api(model: str, messages: list, temperature: float, n: int, fre
                 frequency_penalty=frequency_penalty,
                 user=user
             ).choices[0].message.content
-            if validation_model:
-                # print(f"Response before validation: {response}")
-                response = validation_model.model_validate(json.loads(response))
-                # print(f"After Validation {response=}")
-                break
-        except Exception as e:
-            print((
-                type(e).__name__,
-                e,
-                __file__,
-                e.__traceback__.tb_lineno,
-            ))
 
-            max_retries -= 1
-    return response
+            if validation_model:
+                return validation_model.model_validate(json.loads(response))
+
+            return response
+
+        except Exception as e:
+            logger.error(f"OpenAI API call failed (Retry {attempt + 1}/{max_retries}): {e}")
+
+    return "API call failed after multiple attempts"
 
 
 def rephrase_text(description: str) -> RephraseResponse:
@@ -59,20 +56,13 @@ def rephrase_text(description: str) -> RephraseResponse:
         {"role": "user", "content": f"Rephrase this: {description}"}
     ]
 
-    try:
-        rephrased_text = call_open_ai_api(
-            model="gpt-3.5-turbo",
-            messages=messages,
-            temperature=0.1,
-            n=1,
-            frequency_penalty=0,
-            user="VHemanthC"
-        )
-        if not isinstance(rephrased_text, str):  # Ensure the response is a string
-            raise ValueError("Unexpected response type from OpenAI API")
-    except Exception as e:
-        print(f"Rephrase API failed: {e}")  # Log the error
-        rephrased_text = "Rephrase failed"  # Fallback response
+    rephrased_text = call_open_ai_api(
+        model="gpt-3.5-turbo",
+        messages=messages,
+        temperature=0.1,
+        n=1,
+        frequency_penalty=0,
+        user="VHemanthC"
+    )
 
     return RephraseResponse(original=description, rephrased=rephrased_text)
-
