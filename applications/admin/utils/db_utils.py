@@ -84,6 +84,7 @@ def add_user_details(engine: Engine, user_info: UserInput):
                 status=Status(status=True, error="no error", message="Operation successful"),
                 category_id=category_id
             )
+
     except SQLAlchemyError as e:
         logger.error("Failed to add user: %s", e)
         return AddUserResponse(
@@ -182,3 +183,5 @@ def delete_scenario(engine: Engine, scenario_id: int):
     except SQLAlchemyError as e:
         logger.error("delete_scenario error: %s", e)
         return GenericResponse(status=Status(status=False, error="500", message="Failed to delete scenario"))
+
+
