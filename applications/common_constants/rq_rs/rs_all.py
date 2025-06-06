@@ -13,7 +13,8 @@ class GetTableDataResponse(BaseModel):
 class UserDetailsResponse(BaseModel):
     user_id: int
     user_name: str
-
+    email: str
+    role: str
 class GetUserDetailsResponse(BaseModel):
     users: List[UserDetailsResponse]
 

@@ -112,11 +112,17 @@ def get_user_details(engine) -> List[Dict]:
         metadata,
         autoload_with=engine
     )
+    user_types = Table(
+        "user_types",
+        metadata,
+        autoload_with=engine
+    )
 
-    query = (select(user_details_view.c.user_id, user_details_view.c.user_name).
+    query = (select(user_details_view.c.user_id, user_details_view.c.user_name, user_details_view.c.email,user_types.c.user_type_name.label("role")).
+             select_from(user_details_view.join(user_types,user_details_view.c.user_type == user_types.c.user_type_name)).
              where(user_details_view.c.user_type.in_(["ADM", "DEV"])))
 
     with engine.connect() as connection:
         result = connection.execute(query)
-        return [{"user_id": row.user_id, "user_name": row.user_name} for row in result]
+        return [{"user_id": row.user_id, "user_name": row.user_name, "email": row.email,"role": row.role} for row in result]
 
