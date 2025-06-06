@@ -8,3 +8,8 @@ class UserInput(BaseModel):
     jobrole: str
     isd: str
     mobile_number: str
+class ProductRQ(BaseModel):
+    product_name: str
+class ScenarioRQ(BaseModel):
+    scenario_name: str
+    product_id: int
