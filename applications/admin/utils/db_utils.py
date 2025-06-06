@@ -88,9 +88,9 @@ def add_user_details(engine: Engine, user_info: UserInput):
     except SQLAlchemyError as e:
         logger.error("Failed to add user: %s", e)
         return AddUserResponse(
-            status=Status(status=False, error="500", war="Be cautious while entering the info",
-                          message="Operation Failed due to invalid credentials")
+            status=Status(status=False, error="This email is already registered")
         )
+
 
 # PRODUCTS
 def add_product(engine: Engine, product_info: ProductRQ):
