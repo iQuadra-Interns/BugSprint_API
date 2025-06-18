@@ -184,4 +184,43 @@ def delete_scenario(engine: Engine, scenario_id: int):
         logger.error("delete_scenario error: %s", e)
         return GenericResponse(status=Status(status=False, error="500", message="Failed to delete scenario"))
 
+def delete_user(engine: Engine, user_id: int) -> GenericResponse:
+    user_table = Table(Tables.USERS, DatabaseDetails.METADATA, autoload_with=engine)
 
+    try:
+        with engine.begin() as conn:
+            # Check if user exists
+            result = conn.execute(
+                select(user_table.c.user_type, user_table.c.user_category_id)
+                .where(user_table.c.user_id == user_id)
+            ).first()
+
+            if not result:
+                return GenericResponse(status=Status(status=False, error="404", message="User not found"))
+            user_type = result.user_type
+            category_id = result.user_category_id
+            # Determine the personal details table based on user type
+            if user_type == "ADM":
+                personal_details_table = Table(Tables.PERSONAL_DETAILS_ADMIN, DatabaseDetails.METADATA, autoload_with=engine)
+            elif user_type == "DEV":
+                personal_details_table = Table(Tables.PERSONAL_DETAILS_DEVELOPER, DatabaseDetails.METADATA, autoload_with=engine)
+            elif user_type == "TES":
+                personal_details_table = Table(Tables.PERSONAL_DETAILS_TESTER, DatabaseDetails.METADATA, autoload_with=engine)
+            else:
+                return GenericResponse(status=Status(status=False, error="400", message="Invalid user role"))
+            conn.execute(
+                update(user_table)
+                .where(user_table.c.user_id == user_id)
+                .values(is_active=False)
+            )
+            conn.execute(
+                update(personal_details_table)
+                .where(personal_details_table.c.id == category_id)
+                .values(account_status="INACTIVE")
+            )
+
+        return GenericResponse(status=Status(status=True, message="User deactivated successfully"))
+
+    except SQLAlchemyError as e:
+        logger.error("delete_user error: %s", e)
+        return GenericResponse(status=Status(status=False, error="500", message="Failed to deactivate user"))
