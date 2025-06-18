@@ -116,7 +116,7 @@ def get_user_details(engine) -> List[UserDetailsResponse]:
     )
     query = (
         select(user_details_view.c.user_id, user_details_view.c.user_name, user_details_view.c.email, user_details_view.c.user_type.label("role")).
-            where(user_details_view.c.user_type.in_(["ADM", "DEV", "TES"])))
+            where(user_details_view.c.user_type.in_(["ADM", "DEV", "TES"])).where(user_details_view.c.is_active == True))
 
     with engine.connect() as connection:
         result = connection.execute(query).mappings()

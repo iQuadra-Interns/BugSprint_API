@@ -10,6 +10,7 @@ from applications.admin.utils.db_utils import (
     add_product, get_products, update_product, delete_product,
     add_scenario, get_scenarios_by_product, update_scenario, delete_scenario,
 )
+from applications.admin.utils.db_utils import delete_user
 
 from applications.admin.rq_rs.admin_rq import (
     ProductRQ, ScenarioRQ
@@ -32,6 +33,12 @@ def add_user_endpoint(user_info: UserInput) -> AddUserResponse:
     engine.dispose()
     return resp
 
+@add_user_router.delete("/api/admin/user/{user_id}", response_model=GenericResponse)
+def delete_user_endpoint(user_id: int):
+    engine = create_engine(DatabaseDetails.CONNECTION_STRING)
+    resp = delete_user(engine, user_id)
+    engine.dispose()
+    return resp
 # ---------- PRODUCTS ----------
 @add_user_router.post("/api/admin/product", response_model=GenericResponse)
 def add_product_endpoint(product_info: ProductRQ):

@@ -67,6 +67,11 @@ def fetch_complete_user_info(engine: Engine, sign_in_info: SignInRq):
         created_at=details_df.iloc[0]['created_at'],
         last_updated=details_df.iloc[0]['last_updated']
     )
+    if details_df.iloc[0]['account_status'] == 'INACTIVE':
+        return SignInRs(
+            status=Status(status=False, error=f"{status.HTTP_403_FORBIDDEN}",
+                          message="Account is inactive. Please contact admin.")
+        )
     hashed_pw = details_df.iloc[0]['hashed_password'].encode('utf-8')
 
     user_id_obj = UserId(
