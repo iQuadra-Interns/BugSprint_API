@@ -10,6 +10,7 @@ class UserInput(BaseModel):
     mobile_number: str
 class ProductRQ(BaseModel):
     product_name: str
+    product_short_code: str
 class ScenarioRQ(BaseModel):
     scenario_name: str
     product_id: int
