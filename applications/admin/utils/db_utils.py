@@ -97,8 +97,8 @@ def add_product(engine: Engine, product_info: ProductRQ):
     table = Table(Tables.PRODUCTS, DatabaseDetails.METADATA, autoload_with=engine)
     try:
         with engine.begin() as conn:
-            conn.execute(insert(table).values(product_name=product_info.product_name))
-        return GenericResponse(status=Status(status=True, message="Product added"))
+            conn.execute(insert(table).values(product_name=product_info.product_name, product_short_code=product_info.product_short_code))
+        return GenericResponse(status=Status(status=True, error=None, message="Product added"))
     except SQLAlchemyError as e:
         logger.error("add_product error: %s", e)
         return GenericResponse(status=Status(status=False, error="500", message="Failed to add product"))
@@ -120,8 +120,8 @@ def update_product(engine: Engine, product_id: int, product_info: ProductRQ):
     table = Table(Tables.PRODUCTS, DatabaseDetails.METADATA, autoload_with=engine)
     try:
         with engine.begin() as conn:
-            conn.execute(update(table).where(table.c.product_id == product_id).values(product_name=product_info.product_name))
-        return GenericResponse(status=Status(status=True, message="Product updated"))
+            conn.execute(update(table).where(table.c.product_id == product_id).values(product_name=product_info.product_name, product_short_code=product_info.product_short_code))
+        return GenericResponse(status=Status(status=True, error=None, message="Product updated"))
     except SQLAlchemyError as e:
         logger.error("update_product error: %s", e)
         return GenericResponse(status=Status(status=False, error="500", message="Failed to update product"))
